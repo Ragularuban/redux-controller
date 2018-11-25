@@ -11,10 +11,16 @@
     "pretest": "npm run build",
     "test": "mocha",
     "watch-test": "mocha-typescript-watch",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "bump-version": "npm version patch -m 'Version %s - *'"
   },
   "author": "Ragularuban",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ragularuban/redux-controller.git"
+  },
+  "keywords": [],
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.5",
