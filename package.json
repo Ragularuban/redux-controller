@@ -1,15 +1,30 @@
 {
   "name": "redux-controllers",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "watch": "tsc-watch",
+    "pretest": "npm run build",
+    "test": "mocha",
+    "watch-test": "mocha-typescript-watch",
+    "prepare": "npm run build"
   },
-  "author": "",
+  "author": "Ragularuban",
   "license": "ISC",
   "devDependencies": {
-    "typescript": "^3.1.6"
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.5",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "rimraf": "^2.6.2",
+    "ts-node": "^7.0.1",
+    "tsc-watch": "^1.0.30",
+    "typescript": "^3.1.6",
+    "mocha-typescript": "^1.1.17"
   },
   "dependencies": {
     "immer": "^1.8.0",
