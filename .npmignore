@@ -2,3 +2,6 @@ src
 example
 yarn.lock
 package-lock.json
+tsconfig.json
+test
+.travis.yml
