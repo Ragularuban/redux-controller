@@ -18,7 +18,7 @@ initStore();
 @ReduxConnect<RootState, AppProps>((state) => ({
   username: state.user.username
 }), {
-    debounce: 5000,
+    // debounce: 5000,
   })
 export default class App extends Component<any, any> {
 
