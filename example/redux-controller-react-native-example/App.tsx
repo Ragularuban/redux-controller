@@ -20,6 +20,9 @@ initStore();
     debounce: 5000,
   })
 export default class App extends Component<any, any> {
+  
+  userController = GetController(UserController);
+  todoController = GetController(TodosController)
 
   state = {
     text: "",
@@ -27,18 +30,18 @@ export default class App extends Component<any, any> {
   }
 
   loadTodos = async () => {
-    await GetController(TodosController).loadTodos();
+    await this.todoController.loadTodos();
   }
 
   addTodo = async () => {
-    await GetController(TodosController).addTodo(this.state.text);
+    await this.todoController.addTodo(this.state.text);
     this.setState({
       text: ""
     });
   }
 
   deleteTodo = (text: string) => {
-    GetController(TodosController).removeTodo(text);
+    this.todoController.removeTodo(text);
   }
 
   // @AutoUnsubscribe((context: App) => {
@@ -54,7 +57,7 @@ export default class App extends Component<any, any> {
 
 
   login = async () => {
-    await GetController(UserController).login(this.state.usernameText);
+    await this.userController.login(this.state.usernameText);
   }
 
   render() {

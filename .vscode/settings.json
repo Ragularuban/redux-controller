@@ -1,9 +1,11 @@
 {
     "search.exclude": {
-        "example": true
+        "example": true,
+        "node_modules": true
     },
     "files.exclude": {
-        "example": true
+        "example": true,
+        "node_modules": true
     },
     "cSpell.words": [
         "redux"
