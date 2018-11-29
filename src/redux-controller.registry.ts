@@ -14,6 +14,7 @@ declare let window;
 
 export const ReduxControllerRegistry = {
     controllers: [],
+    rootStoreAsSubject: null,
     ready: false,
     rootStore: null,
     storageEngine: null,
@@ -34,7 +35,7 @@ export const ReduxControllerRegistry = {
         }
         ReduxControllerRegistry.rootStore.dispatch({ type: "REDUX_STORAGE_LOAD", payload: data });
     },
-    init: <T>(controllers: ObjectType<ReduxControllerBase<any, any>>[], options: {
+    init: <RootState>(controllers: ObjectType<ReduxControllerBase<any, any>>[], options: {
         environment: 'REACT_NATIVE' | 'NODE' | 'ANGULAR',
         middleware: any[],
         persistance: {
@@ -138,6 +139,8 @@ export const ReduxControllerRegistry = {
 
         // Create Observables
         const rootStoreAsSubject = new Rx.Subject();
+        ReduxControllerRegistry.rootStoreAsSubject = rootStoreAsSubject;
+
 
         AppStore.subscribe(() => {
             rootStoreAsSubject.next(AppStore.getState());
@@ -170,7 +173,7 @@ export const ReduxControllerRegistry = {
 
         ReduxControllerRegistry.ready = true;
         ReduxControllerRegistry.rootStore = AppStore;
-        return AppStore as Store<T>;
+        return AppStore as Store<RootState>;
     },
     getStore: <T>() => {
         // Returns Get Root Store

@@ -12,7 +12,8 @@
     "test": "mocha",
     "watch-test": "mocha-typescript-watch",
     "prepare": "npm run build",
-    "bump-version": "npm version patch -m 'Version %s - *'"
+    "bump-version": "npm version patch -m 'Version %s - *'",
+    "postinstall": "bash ./fix-types.sh"
   },
   "author": "Ragularuban",
   "license": "ISC",
@@ -24,21 +25,26 @@
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.5",
+    "@types/react": "^16.4.18",
+    "@types/react-native": "0.52.17",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
+    "mocha-typescript": "^1.1.17",
     "rimraf": "^2.6.2",
     "ts-node": "^7.0.1",
     "tsc-watch": "^1.0.30",
-    "typescript": "^3.1.6",
-    "mocha-typescript": "^1.1.17"
+    "typescript": "^3.1.6"
   },
   "dependencies": {
+    "@types/node": "^10.12.10",
     "immer": "^1.8.0",
     "lodash": "^4.17.11",
+    "react": "^16.6.3",
     "redux": "^4.0.1",
     "redux-storage": "^4.1.2",
     "redux-storage-decorator-debounce": "^1.1.3",
     "redux-storage-decorator-filter": "^1.1.8",
+    "redux-storage-engine-localstorage": "^1.1.4",
     "redux-storage-engine-reactnativeasyncstorage": "^1.0.5",
     "rxjs": "^6.3.3"
   }

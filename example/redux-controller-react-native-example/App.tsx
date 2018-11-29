@@ -2,42 +2,29 @@ import * as React from 'react';
 import { Component } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { initStore, RootState } from './controllers/store';
-import { GetController, AutoUnsubscribe } from 'redux-controllers';
-import { TodosController } from './controllers/todos/todos.controller';
+import { GetController, AutoUnsubscribe, ReduxControllerRegistry, ReduxConnect } from 'redux-controllers';
+import { TodosController, Todo } from './controllers/todos/todos.controller';
 import { UserController } from './controllers/user/user.controller';
-
-
-export function ReduxConnect<RootState, ComponentProps>(pathFunction: (state: RootState) => ComponentProps) {
-  return function ReduxControllerInner<RootState, ComponentState>(constructor) {
-
-    return constructor;
-  };
-}
-
+import { ObjectType } from 'redux-controllers/dist/helpers';
 
 // Initiate Redux Stores
 initStore();
 
 
-
-
-@ReduxConnect<RootState, any>((state) => ({
-  username: state.user.username
+@ReduxConnect<RootState, AppProps>((state) => ({
+  todos: state.todos.todos,
 }))
+@ReduxConnect<RootState, AppProps>((state) => ({
+  username: state.user.username
+}), {
+    debounce: 5000,
+  })
 export default class App extends Component<any, any> {
 
   state = {
     text: "",
     usernameText: "",
-    username: "",
-    todos: []
   }
-
-  // @ReduxConnect<RootState, any>((state) => ({
-  //   username: state.user.username
-  // }))
-  // @Input()
-  // fasdfsa;
 
   loadTodos = async () => {
     await GetController(TodosController).loadTodos();
@@ -54,21 +41,13 @@ export default class App extends Component<any, any> {
     GetController(TodosController).removeTodo(text);
   }
 
-  @AutoUnsubscribe((context: App) => {
-    return GetController(TodosController).subscribeTo(state => state.todos).subscribe(todos => {
-      console.log("todos changed", todos);
-      context.setState({
-        todos
-      });
-    });
-  })
-  @AutoUnsubscribe((context: App) => {
-    return GetController(UserController).subscribeTo(state => state.username).subscribe(username => {
-      context.setState({
-        username
-      });
-    });
-  })
+  // @AutoUnsubscribe((context: App) => {
+  //   return GetController(UserController).subscribeTo(state => state.username).subscribe(username => {
+  //     context.setState({
+  //       username
+  //     });
+  //   });
+  // })
   componentWillMount() {
 
   }
@@ -80,7 +59,7 @@ export default class App extends Component<any, any> {
 
   render() {
 
-    if (this.state.username == "") {
+    if (this.props.username == "") {
       return (<View style={styles.container}>
         <View style={styles.header}>
           {/* Title */}
@@ -130,7 +109,7 @@ export default class App extends Component<any, any> {
           </View>
           <View style={styles.todoListCont}>
             {/* Todo List */}
-            {this.state.todos.map(todo => (
+            {this.props.todos.map(todo => (
               <TouchableOpacity key={todo.id} style={styles.todo} onPress={() => this.deleteTodo(todo.id)}>
                 <Text style={styles.todoText}>{todo.text}</Text>
               </TouchableOpacity>
@@ -208,3 +187,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   }
 });
+
+export interface AppProps {
+  username: string,
+  todos: Todo[]
+}

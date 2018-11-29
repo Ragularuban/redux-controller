@@ -1,16 +1,17 @@
 import { RootState } from "../store";
-import { ReduxController, ReduxControllerBase, ReduxAsyncAction, CommitFunction, ReduxAction, AutoUnsubscribe ,ReduxEffect} from "redux-controllers";
+import { ReduxController, ReduxControllerBase, ReduxAsyncAction, CommitFunction, ReduxAction, AutoUnsubscribe, ReduxEffect } from "redux-controllers";
 
 
 export interface TodoState {
     lastSynced: number,
-    todos: {
-        id: string,
-        text: string,
-        isCompleted: boolean
-    }[]
+    todos: Todo[]
 }
 
+export interface Todo {
+    id: string,
+    text: string,
+    isCompleted: boolean
+};
 @ReduxController((rootState: RootState) => rootState.todos)
 export class TodosController extends ReduxControllerBase<TodoState, RootState> {
 
