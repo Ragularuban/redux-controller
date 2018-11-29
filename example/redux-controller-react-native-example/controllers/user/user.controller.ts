@@ -1,5 +1,6 @@
 import { RootState } from "../store";
 import { ReduxController, ReduxControllerBase, ReduxAsyncAction, CommitFunction, ReduxAction, AutoUnsubscribe } from "redux-controllers";
+import { Providers } from "redux-controllers/dist/providers";
 
 
 export interface UserState {
@@ -12,6 +13,8 @@ export class UserController extends ReduxControllerBase<UserState, RootState> {
     defaultState = {
         username: ''
     }
+
+
 
     // @ReduxAction()
     // setUsername(name?: string, state?: UserState){
@@ -36,4 +39,5 @@ export class UserController extends ReduxControllerBase<UserState, RootState> {
             });
         }, 2000);
     }
+
 }

@@ -251,10 +251,21 @@ Todo: Write Doc for Asyncronous Action
 4) Configuring Persistence
 5) Enabling/Disabling Redux Debugger
 6) Accessing Root State within controllers
+7) Omitting sub states from persisting
+8) Named/Unnamed Actions
+9) Customized Commit Messages
+10) Providers
+11) Resetting SubStates and RootState
 
 
 ```
 Todo: Write a doc for Advanced Features and Configurations
+```
+
+# Simple Testing Framework
+
+```
+Todo: Write Doc for Simple Testing Framework
 ```
 
 

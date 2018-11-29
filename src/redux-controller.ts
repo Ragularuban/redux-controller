@@ -8,6 +8,7 @@ import * as _ from 'lodash';
 import { shallowEqualObjects } from "./utilts";
 import { ObjectType } from "./helpers";
 import { ReduxControllerRegistry } from "./redux-controller.registry";
+const changeCase = require('change-case');
 
 /**
  * @description All Redux Controller must extend this class.
@@ -103,7 +104,7 @@ export function ReduxWatch<rootState>(combineFunction: (state: rootState) => any
 
 
 
-export function ReduxAction<payload, state>(actionName: string) {
+export function ReduxAction<payload, state>(actionName?: string) {
     // return the action creater function
     return (target, key: string, descriptor: TypedPropertyDescriptor<(payload: payload, state?: state, draft?: state) => any>) => {
         let originalMethod = descriptor.value;
@@ -115,6 +116,11 @@ export function ReduxAction<payload, state>(actionName: string) {
 
         if (!target.actionNames) {
             target.actionNames = {}
+        }
+
+        // If action name is not given, produce actionName from method key
+        if (!actionName) {
+            actionName = changeCase.constantCase(key);
         }
         target.actionNames[key] = actionName;
 
@@ -180,7 +186,7 @@ export function ReduxAction<payload, state>(actionName: string) {
 }
 
 
-export function ReduxAsyncAction<payload, state>(actionName: string, triggerGlobally?: boolean) {
+export function ReduxAsyncAction<payload, state>(actionName?: string, triggerGlobally?: boolean) {
     // return the action creater function
     return (target, key: string, descriptor: TypedPropertyDescriptor<(payload?: payload, state?: state, commit?: CommitFunction<any>) => any>) => {
         let originalMethod = descriptor.value;
@@ -193,6 +199,11 @@ export function ReduxAsyncAction<payload, state>(actionName: string, triggerGlob
 
         if (!target.reducers) {
             target.reducers = [];
+        }
+
+        // If action name is not given, produce actionName from method key
+        if (!actionName) {
+            actionName = changeCase.constantCase(key);
         }
 
         if (!target.actionNames) {

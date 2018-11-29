@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@types/node": "^10.12.10",
+    "change-case": "^3.0.2",
     "immer": "^1.8.0",
     "lodash": "^4.17.11",
     "react": "^16.6.3",
