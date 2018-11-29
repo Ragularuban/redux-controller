@@ -1,6 +1,6 @@
 import { getDescendantProp, findPath } from "./utilts";
 import * as storage from 'redux-storage';
-import { Providers } from "./providers";
+import { Providers, Environnement } from "./providers";
 import debounce from 'redux-storage-decorator-debounce';
 import filter from 'redux-storage-decorator-filter';
 import { Store, combineReducers, createStore, applyMiddleware, Reducer, compose } from "redux";
@@ -36,7 +36,7 @@ export const ReduxControllerRegistry = {
         ReduxControllerRegistry.rootStore.dispatch({ type: "REDUX_STORAGE_LOAD", payload: data });
     },
     init: <RootState>(controllers: ObjectType<ReduxControllerBase<any, any>>[], options: {
-        environment: 'REACT_NATIVE' | 'NODE' | 'ANGULAR',
+        environment: Environnement,
         middleware: any[],
         persistance: {
             active: boolean,
