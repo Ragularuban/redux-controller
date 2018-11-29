@@ -7,6 +7,7 @@ import { TodosController, Todo } from './controllers/todos/todos.controller';
 import { UserController } from './controllers/user/user.controller';
 import { ObjectType } from 'redux-controllers/dist/helpers';
 
+
 // Initiate Redux Stores
 initStore();
 
@@ -20,7 +21,7 @@ initStore();
     debounce: 5000,
   })
 export default class App extends Component<any, any> {
-  
+
   userController = GetController(UserController);
   todoController = GetController(TodosController)
 
