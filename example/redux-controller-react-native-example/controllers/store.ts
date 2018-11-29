@@ -1,7 +1,7 @@
 import { TodoState, TodosController } from "./todos/todos.controller";
 import { Reducer, combineReducers } from "redux";
 import { UserState, UserController } from "./user/user.controller";
-import { ReduxControllerRegistry } from "./redux-controller";
+import { ReduxControllerRegistry } from "redux-controllers";
 
 export interface RootState {
     todos: TodoState,
@@ -10,7 +10,8 @@ export interface RootState {
 
 export function initStore() {
     ReduxControllerRegistry.init([
-        TodosController
+        TodosController,
+        UserController
     ], {
             environment: 'REACT_NATIVE',
             middleware: [],

@@ -173,6 +173,7 @@ export const ReduxControllerRegistry = {
         return AppStore as Store<T>;
     },
     getStore: <T>() => {
+        // Returns Get Root Store
         if (ReduxControllerRegistry.ready) {
             return ReduxControllerRegistry.rootStore as Store<T>;
         }

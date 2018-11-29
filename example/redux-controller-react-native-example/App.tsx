@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Component } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { initStore, RootState } from './controllers/store';
-import { GetController, AutoUnsubscribe } from './controllers/redux-controller';
+import { GetController, AutoUnsubscribe } from 'redux-controllers';
 import { TodosController } from './controllers/todos/todos.controller';
 import { UserController } from './controllers/user/user.controller';
 

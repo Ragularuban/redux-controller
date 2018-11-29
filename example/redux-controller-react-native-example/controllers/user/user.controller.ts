@@ -1,5 +1,5 @@
 import { RootState } from "../store";
-import { ReduxController, ReduxControllerBase, ReduxAsyncAction, CommitFunction, ReduxAction, AutoUnsubscribe } from "../redux-controller";
+import { ReduxController, ReduxControllerBase, ReduxAsyncAction, CommitFunction, ReduxAction, AutoUnsubscribe } from "redux-controllers";
 
 
 export interface UserState {
