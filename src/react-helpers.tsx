@@ -3,8 +3,11 @@ import * as React from 'react';
 import { Component } from 'react';
 import { debounce, throttle, distinctUntilChanged, map } from 'rxjs/operators';
 import { timer } from 'rxjs';
+import * as Rx from 'rxjs';
+
 import { ReduxControllerRegistry } from ".";
 import { shallowEqualObjects } from "./utilts";
+
 
 export function AutoUnsubscribe(func) {
     return (target, key: string, descriptor: TypedPropertyDescriptor<(...any) => any>) => {
@@ -38,8 +41,16 @@ export function ReduxConnect<RootState, ComponentProps>(pathFunction: (state: Ro
             reduxControllerSubscriptions = [];
 
             componentWillMount() {
-                let source = ReduxControllerRegistry.rootStoreAsSubject
-                    .pipe(map(pathFunction));
+                const rootStore = ReduxControllerRegistry.getStore();
+                const subject = new Rx.BehaviorSubject(rootStore.getState());
+
+                const rootStoreSubscription = rootStore.subscribe(() => {
+                    subject.next(rootStore.getState());
+                });
+
+                this.reduxControllerSubscriptions.push(rootStoreSubscription);
+
+                let source = subject.pipe(map(pathFunction));
 
                 if (options.debounce) {
                     source = source.pipe(debounce(() => timer(options.debounce)));
@@ -49,7 +60,7 @@ export function ReduxConnect<RootState, ComponentProps>(pathFunction: (state: Ro
                 }
 
                 // Compare the out out to omit unwanted emits
-                source.pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n)))
+                // source.pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n)))
 
                 const subscription = source
                     .subscribe((state) => {
