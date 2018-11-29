@@ -48,7 +48,7 @@ export function ReduxConnect<RootState, ComponentProps>(pathFunction: (state: Ro
                     subject.next(rootStore.getState());
                 });
 
-                this.reduxControllerSubscriptions.push({ unsubscribe: rootStoreUnSubscription() });
+                this.reduxControllerSubscriptions.push({ unsubscribe: rootStoreUnSubscription });
 
                 let source = subject.pipe(map(pathFunction));
 
