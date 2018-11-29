@@ -1,7 +1,7 @@
 import { ObjectType } from "./helpers";
 import * as React from 'react';
 import { Component } from 'react';
-import { debounce, throttle, distinctUntilChanged } from 'rxjs/operators';
+import { debounce, throttle, distinctUntilChanged, map } from 'rxjs/operators';
 import { timer } from 'rxjs';
 import { ReduxControllerRegistry } from ".";
 import { shallowEqualObjects } from "./utilts";
@@ -39,7 +39,7 @@ export function ReduxConnect<RootState, ComponentProps>(pathFunction: (state: Ro
 
             componentWillMount() {
                 let source = ReduxControllerRegistry.rootStoreAsSubject
-                    .subscribeToRootStore(pathFunction as any);
+                    .pipe(map(pathFunction));
 
                 if (options.debounce) {
                     source = source.pipe(debounce(() => timer(options.debounce)));
@@ -70,7 +70,7 @@ export function ReduxConnect<RootState, ComponentProps>(pathFunction: (state: Ro
             }
 
             render() {
-                return (<OriginalComponent { ...this.props } {...this.state } />)
+                return (<OriginalComponent {...this.props} {...this.state} />)
             };
         } as any
     }
