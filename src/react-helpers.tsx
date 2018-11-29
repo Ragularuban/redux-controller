@@ -44,11 +44,11 @@ export function ReduxConnect<RootState, ComponentProps>(pathFunction: (state: Ro
                 const rootStore = ReduxControllerRegistry.getStore();
                 const subject = new Rx.BehaviorSubject(rootStore.getState());
 
-                const rootStoreSubscription = rootStore.subscribe(() => {
+                const rootStoreUnSubscription = rootStore.subscribe(() => {
                     subject.next(rootStore.getState());
                 });
 
-                this.reduxControllerSubscriptions.push(rootStoreSubscription);
+                this.reduxControllerSubscriptions.push({ unsubscribe: rootStoreUnSubscription() });
 
                 let source = subject.pipe(map(pathFunction));
 
