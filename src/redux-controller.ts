@@ -14,7 +14,7 @@ import { ReduxControllerRegistry } from "./redux-controller.registry";
  */
 export class ReduxControllerBase<state, rootState> {
     private reducers: any[] = [];
-    private rootPathFunction: (state) => any;
+    rootPathFunction: (state) => any;
 
     omittedPaths: string[][] = [];
     rootStore: Store<rootState>;

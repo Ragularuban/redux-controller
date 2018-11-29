@@ -4,5 +4,8 @@
     },
     "files.exclude": {
         "example": true
-    }
+    },
+    "cSpell.words": [
+        "redux"
+    ]
 }

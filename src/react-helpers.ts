@@ -1,3 +1,4 @@
+import { ObjectType } from "./helpers";
 
 export function AutoUnsubscribe(func) {
     return (target, key: string, descriptor: TypedPropertyDescriptor<(...any) => any>) => {
@@ -21,3 +22,10 @@ export function AutoUnsubscribe(func) {
     }
 }
 
+
+export function ReduxConnect(pathFunction: (state) => any) {
+    return function ReduxControllerInner<T>(constructor: ObjectType<T>) {
+
+        return constructor;
+    };
+}

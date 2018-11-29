@@ -9,6 +9,10 @@ Usually, working on Redux architecture feels very verbose and time consuming. If
 
 ## Why Redux Controllers
 You will find an easy way to create redux stores that can be easily integrated to react/react native/angular code base
+i
+**Features**
+- Out of the box persistent
+- Ability to use existing reducers and middleware along with redux-controllers
 
 # Get Started
 

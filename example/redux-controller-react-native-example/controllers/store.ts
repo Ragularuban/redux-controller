@@ -1,21 +1,23 @@
 import { TodoState, TodosController } from "./todos/todos.controller";
-import { ReduxControllerRegistry, GetController } from 'redux-controllers';
 import { Reducer, combineReducers } from "redux";
+import { UserState, UserController } from "./user/user.controller";
+import { ReduxControllerRegistry } from "./redux-controller";
 
 export interface RootState {
-    todos: TodoState
+    todos: TodoState,
+    user: UserState
 }
 
-const appReducer: Reducer<RootState> = combineReducers({
-    todos: GetController(TodosController).getReducerFunction(),
-});
-
-export const RootStore = ReduxControllerRegistry.init(appReducer);
-
 export function initStore() {
-    RootStore.getState();
-    // Ideal Implementation
-    // ReduxControllerRegistry.init([
-    //     TodosController
-    // ]);
+    ReduxControllerRegistry.init([
+        TodosController
+    ], {
+            environment: 'REACT_NATIVE',
+            middleware: [],
+            persistance: {
+                active: true,
+                throttle: 5000,
+            },
+            enableDevTools: true
+        });
 }

@@ -47,3 +47,16 @@ export function shallowEqualObjects(objA: Object, objB: Object) {
 export function getDescendantProp(obj: Object, path: string) {
     return path.split('.').reduce((acc, part) => acc && acc[part], obj)
 }
+
+
+export function findPath(pathFunc) {
+    let path = [];
+    const tracker = new Proxy({}, {
+        get(target, propKey) {
+            path.push(propKey);
+            return tracker;
+        }
+    });
+    pathFunc(tracker);
+    return path;
+}

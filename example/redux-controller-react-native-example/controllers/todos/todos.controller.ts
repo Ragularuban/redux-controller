@@ -1,5 +1,6 @@
 import { RootState } from "../store";
-import { ReduxController, ReduxControllerBase, ReduxAsyncAction, CommitFunction, ReduxAction, AutoUnsubscribe } from "redux-controllers";
+import { ReduxController, ReduxControllerBase, ReduxAsyncAction, CommitFunction, ReduxAction, AutoUnsubscribe } from "../redux-controller";
+import { ReduxEffect } from "../redux-controller";
 
 
 export interface TodoState {
@@ -27,7 +28,7 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
     @ReduxAsyncAction<any, TodoState>('LOAD_TODOS')
     async loadTodos(payload?: any, state?: TodoState, commit?: CommitFunction<TodoState>) {
         setTimeout(() => {
-            state = commit(state => {
+            commit(state => {
                 state.todos = [
                     {
                         id: "001",
@@ -63,35 +64,14 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
         });
     }
 
+    @ReduxAction('REMOVE_TODO')
+    removeTodo(text: string, state?: TodoState) {
+        let index = state.todos.findIndex(t => t.id == text);
+        if (index > -1) state.todos.splice(index, 1);
+    }
 
-
-    // provider = {
-    //     taggedImages: this.loadTodosResource
-    // }
-
-    // @ReduxWatch(state => state.user.id)
-    // @ReduxAsyncAction('SYNC_TAGGED_IMAGES')
-    // loadTodos() {
-    //     // Todo: When App Starts, we need to cross check whether sync and async functions are properly done
-    // }
-
-    // @ReduxAsyncAction('SYNC_TAGGED_IMAGES')
-    // deleteTodo() {
-
-    // }
-
-    // @ReduxAsyncAction('SYNC_TAGGED_IMAGES')
-    // markTodoAsCompleted() {
-
-    // }
-
-
-    // @Provider({
-    //     timeout: 3000
-    // })
-    // loadTodosResource() {
-
-    // }
-
-    // Possibly - Connect to JSON APIs straight away and provide a simple CRUD operation out of the box
+    @ReduxEffect('LOGIN_COMIT')
+    watchForLogin(text: string, state?: TodoState) {
+        this.loadTodos();
+    }
 }
