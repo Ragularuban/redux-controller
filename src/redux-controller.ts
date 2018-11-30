@@ -33,14 +33,18 @@ export class ReduxControllerBase<state, rootState> {
     providerMap: { [path: string]: (path: string) => any } = {};
 
     reducerForProvider = (state, action) => {
-        if (action.type == "LOAD_THROUGH_PROVIDER_SUCCESS") {
+        let rootPathArray = findPath(this.rootPathFunction);
+        let rootPath = rootPathArray.join('.'); 
+        let shouldAction = rootPath == action.rootPath;
+
+        if (shouldAction && action.type == "LOAD_THROUGH_PROVIDER_SUCCESS") {
             let path = action.payload.path;
             let data = action.payload.data;
             return immutable.set(state, path, {
                 lastUpdated: new Date().getTime(),
                 data: data
             });
-        } else if (action.type == "LOAD_THROUGH_PROVIDER") {
+        } else if (shouldAction && action.type == "LOAD_THROUGH_PROVIDER") {
             let path = action.payload.path;
             let targetMap;
             try {
@@ -76,12 +80,15 @@ export class ReduxControllerBase<state, rootState> {
     async load<T>(pathFunction: (state: state) => T, forceRefresh?: boolean) {
         // Get Safely the path provided
         let pathArray = findPath(pathFunction);
+        let rootPathArray = findPath(this.rootPathFunction);
         let path = pathArray.join('.')
+        let rootPath = rootPathArray.join('.');
 
         const action = {
             type: 'LOAD_THROUGH_PROVIDER',
             payload: {
-                path
+                path,
+                rootPath
             }
         };
         this.rootStore.dispatch(action);
@@ -104,6 +111,7 @@ export class ReduxControllerBase<state, rootState> {
                     type: 'LOAD_THROUGH_PROVIDER_SUCCESS',
                     payload: {
                         path,
+                        rootPath,
                         data
                     }
                 };
@@ -114,6 +122,7 @@ export class ReduxControllerBase<state, rootState> {
                     type: 'LOAD_THROUGH_PROVIDER_FAILED',
                     payload: {
                         path,
+                        rootPath,
                         e
                     }
                 };
