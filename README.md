@@ -2,7 +2,7 @@
 
 ## Warning
 
-<b>This Project is not yet completed</b>
+<b>This Project is not yet completed. Use at your own risk</b>
 
 
 ## Motivation
@@ -260,12 +260,7 @@ Todo: Change the state Parater to MutableState to describe the parameter
 10) Providers
 11) Resetting SubStates and RootState
 12) Writing Helper Functions in Redux Controller
-13) Todo: Check async and sync function in redux controllers
-14) Todo: State based watchers
-15) Probably Could provide out of the box CRUD
-// - delete(state=>state.fsdf3.4324)
-// - update(4234234=>state.sgf.422)
-// - Get() == Already done with provide with key
+13) State based watchers
 
 
 ```
@@ -280,6 +275,7 @@ Todo: Write a doc for Advanced Features and Configurations
 
 ```
 Todo: Write a doc for Complex Store Examples
+
 ```
 
 # Simple Testing Framework
