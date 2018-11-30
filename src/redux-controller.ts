@@ -70,6 +70,7 @@ export class ReduxControllerBase<state, rootState> {
         }
         getProviders(this.providers.state);
         this.providerMap = providerMap;
+        console.log("this.providerMap", this.providerMap);
         this.reducers.push(this.reducerForProvider);
     }
 
@@ -96,7 +97,7 @@ export class ReduxControllerBase<state, rootState> {
         if (!((forceRefresh || (mappedItem.lastUpdated + this.providers.cacheTimeout < currentTime)))) {
             return mappedItem;
         }
-
+        console.log("this.providerMap", this.providerMap);
         if (this.providerMap[path]) {
             try {
                 const data = await this.providerMap[path](path);
@@ -122,7 +123,7 @@ export class ReduxControllerBase<state, rootState> {
             }
         } else {
             // Todo: Show hints in the warning
-            console.warn("Tried to load path that is not provided");
+            console.warn(`Tried to load path that is not provided : ${findPath(this.rootPathFunction).join('.')} - >${path}`);
             return mappedItem.data;
         }
     }

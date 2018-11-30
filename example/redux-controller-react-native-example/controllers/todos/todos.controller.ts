@@ -47,13 +47,14 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
         cacheTimeout: 0
     }
 
-    // @ReduxAsyncAction('LOAD_TODOS')
-    async loadTodos(payload?: any, state?: TodoState, commit?: CommitFunction<TodoState>) {
+
+    async loadTodos(force?: any, state?: TodoState, commit?: CommitFunction<TodoState>) {
         // setTimeout(() => {
         //     commit(state => {
         //         state.todoList.data = dummyTodos;
         //     });
         // }, 2000);
+        console.log("Load Todos");
         await this.load(state => state.todoList);
     }
 
@@ -72,7 +73,7 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
         if (index > -1) state.todoList.data.splice(index, 1);
     }
 
-    @ReduxEffect('LOGIN_COMIT')
+    @ReduxEffect('LOGIN_COMMIT')
     watchForLogin(text: string, state?: TodoState) {
         this.loadTodos();
     }
