@@ -62,9 +62,9 @@ export class ReduxControllerBase<state, rootState> {
         function getProviders(obj: Object, path: string = '') {
             for (let key in obj) {
                 if (obj[key] && obj[key].isProvider) {
-                    providerMap[`${path}.${key}`] = obj[key].providerFunction;
+                    providerMap[path?`${path}.${key}`:key] = obj[key].providerFunction;
                 } else {
-                    getProviders(obj[key], `${path}.${key}`);
+                    getProviders(obj[key], path?`${path}.${key}`:key);
                 }
             }
         }
@@ -123,7 +123,7 @@ export class ReduxControllerBase<state, rootState> {
             }
         } else {
             // Todo: Show hints in the warning
-            console.warn(`Tried to load path that is not provided : ${findPath(this.rootPathFunction).join('.')} - >${path}`);
+            console.warn(`Tried to load path that is not provided : ${findPath(this.rootPathFunction).join('.')} -> ${path}`);
             return mappedItem.data;
         }
     }

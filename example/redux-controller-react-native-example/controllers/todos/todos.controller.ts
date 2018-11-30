@@ -33,7 +33,7 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
         }
     }
 
-    providers: any = {
+    providers = {
         state: {
             todoList: Provider(async () => {
                 await new Promise((res, rej) => {
