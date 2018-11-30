@@ -35,7 +35,7 @@ export class ReduxControllerBase<state, rootState> {
     reducerForProvider = (state, action) => {
         let rootPathArray = findPath(this.rootPathFunction);
         let rootPath = rootPathArray.join('.'); 
-        let shouldAction = rootPath == action.rootPath;
+        let shouldAction = action.payload && (rootPath == action.payload.rootPath);
 
         if (shouldAction && action.type == "LOAD_THROUGH_PROVIDER_SUCCESS") {
             let path = action.payload.path;
