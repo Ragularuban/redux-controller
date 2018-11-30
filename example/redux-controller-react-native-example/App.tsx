@@ -5,7 +5,6 @@ import { initStore, RootState } from './controllers/store';
 import { GetController, AutoUnsubscribe, ReduxControllerRegistry, ReduxConnect } from 'redux-controllers';
 import { TodosController, Todo } from './controllers/todos/todos.controller';
 import { UserController } from './controllers/user/user.controller';
-import { ObjectType } from 'redux-controllers/dist/helpers';
 
 
 // Initiate Redux Stores
