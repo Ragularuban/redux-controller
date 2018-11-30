@@ -31,14 +31,14 @@ export class ReduxControllerBase<state, rootState> {
             cacheTimeout: 0
         };
     providerMap: { [path: string]: (path: string) => any } = {};
+
     reducerForProvider = (state, action) => {
         if (action.type == "LOAD_THROUGH_PROVIDER_SUCCESS") {
             let path = action.payload.path;
             let data = action.payload.data;
-            return produce(state, draft => {
-                let target: { lastUpdated: number, data: any } = getDescendantProp(draft, path);
-                target.lastUpdated = new Date().getTime();
-                target.data = data;
+            return immutable.set(state, path, {
+                lastUpdated: new Date().getTime(),
+                data: data
             });
         } else if (action.type == "LOAD_THROUGH_PROVIDER") {
             let path = action.payload.path;
@@ -62,15 +62,14 @@ export class ReduxControllerBase<state, rootState> {
         function getProviders(obj: Object, path: string = '') {
             for (let key in obj) {
                 if (obj[key] && obj[key].isProvider) {
-                    providerMap[path?`${path}.${key}`:key] = obj[key].providerFunction;
+                    providerMap[path ? `${path}.${key}` : key] = obj[key].providerFunction;
                 } else {
-                    getProviders(obj[key], path?`${path}.${key}`:key);
+                    getProviders(obj[key], path ? `${path}.${key}` : key);
                 }
             }
         }
         getProviders(this.providers.state);
         this.providerMap = providerMap;
-        console.log("this.providerMap", this.providerMap);
         this.reducers.push(this.reducerForProvider);
     }
 
