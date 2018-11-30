@@ -53,7 +53,7 @@ export default class App extends Component<any, any> {
   //   });
   // })
   componentWillMount() {
-
+    this.todoController.load(state=>state.todoList);
   }
 
 

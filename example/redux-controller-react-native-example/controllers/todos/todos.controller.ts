@@ -1,5 +1,5 @@
 import { RootState } from "../store";
-import { ReduxController, ReduxControllerBase, ReduxAsyncAction, CommitFunction, ReduxAction, AutoUnsubscribe, ReduxEffect } from "redux-controllers";
+import { ReduxController, ReduxControllerBase, ReduxAsyncAction, CommitFunction, ReduxAction, AutoUnsubscribe, ReduxEffect, CachedState, Provider, ProvideKey, ProvidedState } from "redux-controllers";
 
 
 export interface TodoState {
@@ -16,27 +16,6 @@ export interface Todo {
     isCompleted: boolean
 };
 
-export interface CachedState<T> {
-    lastUpdated: number,
-    data: T
-}
-
-export function defaultCachedState<T>(value: T): CachedState<T> {
-    return {
-        lastUpdated: 0,
-        data: value
-    }
-}
-
-export function Provider<T>(providerFunc: (...any) => Promise<T>, timeout?: number): T {
-
-    return null;
-};
-
-export function ProvideKey<T>(providerFunc: (key: string, ...arg) => Promise<T>, timeout?: number): { [key: string]: T } {
-
-    return null;
-};
 
 
 @ReduxController((rootState: RootState) => rootState.todos)
@@ -48,46 +27,39 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
 
     defaultState = {
         lastSynced: 0,
-        todoList: defaultCachedState([]),
+        todoList: ProvidedState([]),
         todoMap: {
 
         }
     }
 
-    @ReduxAsyncAction
-    load(pathFunction){
-        // Get State
-        // Get Safely the path provided
-        // Get the provider configuration
-        // Dispathc LOAD_THORUGH_PROVIDER,payload:{path:'sfdsf'}
-        // if the path is null or has property last updated and it is timeedout
-        // 
-        // from the configuration call the loading call
-        // 
+    providers: any = {
+        state: {
+            todoList: Provider(async () => {
+                await new Promise((res, rej) => {
+                    setTimeout(() => {
+                        res();
+                    }, 2000);
+                });
+                return dummyTodos;
+            }, 2000),
+        },
+        cacheTimeout: 0
     }
 
-    providers: Partial<TodoState> = {
-        todoList: Provider(async () => {
-            // Timeout with Cache
-            return dummyTodos;
-        }, 2000),
-        todoMap: ProvideKey(async (key) => {
-            return dummyTodos[0];
-        }, 2000)
-    }
-
-    @ReduxAsyncAction('LOAD_TODOS')
+    // @ReduxAsyncAction('LOAD_TODOS')
     async loadTodos(payload?: any, state?: TodoState, commit?: CommitFunction<TodoState>) {
-        setTimeout(() => {
-            commit(state => {
-                state.todoList = dummyTodos;
-            });
-        }, 2000);
+        // setTimeout(() => {
+        //     commit(state => {
+        //         state.todoList.data = dummyTodos;
+        //     });
+        // }, 2000);
+        await this.load(state => state.todoList);
     }
 
     @ReduxAction('ADD_TODO')
     addTodo(text: string, state?: TodoState) {
-        state.todoList.push({
+        state.todoList.data.push({
             id: text,
             text: text,
             isCompleted: false
@@ -96,8 +68,8 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
 
     @ReduxAction('REMOVE_TODO')
     removeTodo(text: string, state?: TodoState) {
-        let index = state.todoList.findIndex(t => t.id == text);
-        if (index > -1) state.todoList.splice(index, 1);
+        let index = state.todoList.data.findIndex(t => t.id == text);
+        if (index > -1) state.todoList.data.splice(index, 1);
     }
 
     @ReduxEffect('LOGIN_COMIT')

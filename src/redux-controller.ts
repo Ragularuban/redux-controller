@@ -8,7 +8,6 @@ import * as _ from 'lodash';
 import { shallowEqualObjects, findPath, getDescendantProp } from "./utilts";
 import { ObjectType } from "./helpers";
 import { ReduxControllerRegistry } from "./redux-controller.registry";
-import console = require("console");
 const changeCase = require('change-case');
 import immutable from 'object-path-immutable';
 
@@ -472,12 +471,12 @@ export function ProvidedState<T>(value: T): CachedState<T> {
     }
 }
 
-export function Provider<T>(providerFunction: (...any) => Promise<T>, timeout?: number): T {
+export function Provider<T>(providerFunction: (...any) => Promise<T>, timeout?: number): CachedState<T> {
 
     return {
         providerFunction,
         isProvider: true
-    } as any as T;
+    } as any as CachedState<T>;
 };
 
 export function ProvideKey<T>(providerFunction: (key: string, ...arg) => Promise<T>, timeout?: number): { [key: string]: T } {
