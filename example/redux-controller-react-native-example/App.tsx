@@ -13,7 +13,7 @@ initStore();
 
 
 @ReduxConnect<RootState, AppProps>((state) => ({
-  todos: state.todos.todos,
+  todos: state.todos.todoList,
 }))
 @ReduxConnect<RootState, AppProps>((state) => ({
   username: state.user.username

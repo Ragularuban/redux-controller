@@ -49,11 +49,11 @@ export function getDescendantProp(obj: Object, path: string) {
 }
 
 
-export function findPath(pathFunc) {
-    let path = [];
+export function findPath(pathFunc: (obj: any) => any) {
+    let path: string[] = [];
     const tracker = new Proxy({}, {
         get(target, propKey) {
-            path.push(propKey);
+            path.push(propKey as string);
             return tracker;
         }
     });

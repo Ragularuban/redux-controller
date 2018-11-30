@@ -171,6 +171,11 @@ export const ReduxControllerRegistry = {
             ctrl.class.prototype.rootPathFunction = ctrl.class.rootPathFunction;
         });
 
+        //Activate Providers
+        ReduxControllerRegistry.controllers.forEach(ctrl => {
+            ctrl.instance.initProviders();
+        });
+
         ReduxControllerRegistry.ready = true;
         ReduxControllerRegistry.rootStore = AppStore;
         return AppStore as Store<RootState>;

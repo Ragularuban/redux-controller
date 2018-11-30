@@ -2,7 +2,7 @@
 export { ReduxControllerRegistry } from "./redux-controller.registry";
 
 // Export Redux Controller and core functions
-export { ReduxController, ReduxControllerBase, ReduxAsyncAction, ReduxWatch, ReduxAction, CommitFunction, ReduxEffect } from "./redux-controller";
+export { ReduxController, ReduxControllerBase, ReduxAsyncAction, ReduxWatch, ReduxAction, CommitFunction, ReduxEffect, CachedState, ProvidedState, Provider, ProvideKey } from "./redux-controller";
 
 // Export Redux Controller Helpers
 export { GetController, GetSafely } from "./helpers";

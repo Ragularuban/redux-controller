@@ -5,22 +5,128 @@ import * as Rx from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { } from "redux";
 import * as _ from 'lodash';
-import { shallowEqualObjects } from "./utilts";
+import { shallowEqualObjects, findPath, getDescendantProp } from "./utilts";
 import { ObjectType } from "./helpers";
 import { ReduxControllerRegistry } from "./redux-controller.registry";
+import console = require("console");
 const changeCase = require('change-case');
+import immutable from 'object-path-immutable';
 
 /**
  * @description All Redux Controller must extend this class.
  */
 export class ReduxControllerBase<state, rootState> {
-    private reducers: any[] = [];
+    private reducers: Reducer[] = [];
     rootPathFunction: (state) => any;
 
     omittedPaths: string[][] = [];
     rootStore: Store<rootState>;
 
     defaultState: state = {} as state;
+
+    providers: {
+        state: Partial<state>,
+        cacheTimeout?: number
+    } = {
+            state: {},
+            cacheTimeout: 0
+        };
+    providerMap: { [path: string]: (path: string) => any } = {};
+    reducerForProvider = (state, action) => {
+        if (action.type == "LOAD_THROUGH_PROVIDER_SUCCESS") {
+            let path = action.payload.path;
+            let data = action.payload.data;
+            return produce(state, draft => {
+                let target: { lastUpdated: number, data: any } = getDescendantProp(draft, path);
+                target.lastUpdated = new Date().getTime();
+                target.data = data;
+            });
+        } else if (action.type == "LOAD_THROUGH_PROVIDER") {
+            let path = action.payload.path;
+            let targetMap;
+            try {
+                targetMap = getDescendantProp(state, path)
+            } catch (e) {
+                // Ignore Error
+            }
+            if (!targetMap) {
+                // For some edge cases if the target object is empty, initiate the target object with default value
+                return immutable.set(state, path, getDescendantProp(this.defaultState, path));
+            }
+
+        }
+        return state;
+    }
+
+    initProviders() {
+        let providerMap: { [path: string]: () => any } = {};
+        function getProviders(obj: Object, path: string = '') {
+            for (let key in obj) {
+                if (obj[key] && obj[key].isProvider) {
+                    providerMap[`${path}.${key}`] = obj[key].providerFunction;
+                } else {
+                    getProviders(obj[key], `${path}.${key}`);
+                }
+            }
+        }
+        getProviders(this.providers.state);
+        this.providerMap = providerMap;
+        this.reducers.push(this.reducerForProvider);
+    }
+
+    async load<T>(pathFunction: (state: state) => T, forceRefresh?: boolean) {
+        // Get Safely the path provided
+        let pathArray = findPath(pathFunction);
+        let path = pathArray.join('.')
+
+        const action = {
+            type: 'LOAD_THROUGH_PROVIDER',
+            payload: {
+                path
+            }
+        };
+        this.rootStore.dispatch(action);
+        // The previous action will make sure that the provided path is never empty or not initiated
+        let mappedItem: {
+            lastUpdated: number,
+            data: any
+        } = getDescendantProp(this.state, path);
+
+        // If item does not need to be loaded, then return the item
+        const currentTime = new Date().getTime();
+        if (!((forceRefresh || (mappedItem.lastUpdated + this.providers.cacheTimeout < currentTime)))) {
+            return mappedItem;
+        }
+
+        if (this.providerMap[path]) {
+            try {
+                const data = await this.providerMap[path](path);
+                const action = {
+                    type: 'LOAD_THROUGH_PROVIDER_SUCCESS',
+                    payload: {
+                        path,
+                        data
+                    }
+                };
+                this.rootStore.dispatch(action);
+                return data;
+            } catch (e) {
+                const action = {
+                    type: 'LOAD_THROUGH_PROVIDER_FAILED',
+                    payload: {
+                        path,
+                        e
+                    }
+                };
+                this.rootStore.dispatch(action);
+                throw e;
+            }
+        } else {
+            // Todo: Show hints in the warning
+            console.warn("Tried to load path that is not provided");
+            return mappedItem.data;
+        }
+    }
 
     private setStore(store) {
         this.rootStore = store;
@@ -187,7 +293,7 @@ export function ReduxAction<payload, state>(actionName?: string) {
 
 
 export function ReduxAsyncAction<payload, state>(actionName?: string, triggerGlobally?: boolean) {
-    // return the action creater function
+    // return the action creator function
     return (target, key: string, descriptor: TypedPropertyDescriptor<(payload?: payload, state?: state, commit?: CommitFunction<any>) => any>) => {
         let originalMethod = descriptor.value;
         let commitReducerFunction = (state, action) => {
@@ -226,34 +332,34 @@ export function ReduxAsyncAction<payload, state>(actionName?: string, triggerGlo
                     draftPosition = 2;
                     argsToBeInjected[1] = state;
 
-                    let comitFunction = (prducerFunction) => {
-                        commitFunctionToExecute = prducerFunction;
+                    let commitFunction = (producerFunction) => {
+                        commitFunctionToExecute = producerFunction;
                         const action = {
-                            type: `${actionName}_COMIT`,
+                            type: `${actionName}_COMMIT`,
                             payload: {}
                         };
                         target.rootStore.dispatch(action);
                         return target.rootPathFunction(target.rootStore.getState());
                     }
 
-                    argsToBeInjected[2] = comitFunction;
+                    argsToBeInjected[2] = commitFunction;
                 } else {
                     for (let i = 0; i < matrixDataRequests.length; i++) {
                         if (matrixDataRequests[i]) {
                             if (matrixDataRequests[i] == "STATE") {
                                 argsToBeInjected[i] = state;
-                            } else if (matrixDataRequests[i] == "COMIT") {
-                                let comitFunction = (prducerFunction?) => {
-                                    commitFunctionToExecute = prducerFunction;
+                            } else if (matrixDataRequests[i] == "COMMIT") {
+                                let commitFunction = (producerFunction?) => {
+                                    commitFunctionToExecute = producerFunction;
                                     const action = {
-                                        type: `${actionName}_COMIT`,
+                                        type: `${actionName}_COMMIT`,
                                         payload: {}
                                     };
                                     target.rootStore.dispatch(action);
                                     return target.rootPathFunction(target.rootStore.getState());
                                 }
                                 draftPosition = i;
-                                argsToBeInjected[i] = comitFunction;
+                                argsToBeInjected[i] = commitFunction;
                             }
                         } else {
                             // Not a Matrix Data
@@ -284,7 +390,7 @@ export function ReduxAsyncAction<payload, state>(actionName?: string, triggerGlo
         });
 
         target.reducers.push((state, action) => {
-            if (`${actionName}_COMIT` == action.type) {
+            if (`${actionName}_COMMIT` == action.type) {
                 return commitReducerFunction(state, action);
             }
             return state || target.defaultState;
@@ -354,3 +460,30 @@ export interface CommitFunction<T> {
     (fun: (state: T) => any): T;
 }
 
+export interface CachedState<T> {
+    lastUpdated: number,
+    data: T
+}
+
+export function ProvidedState<T>(value: T): CachedState<T> {
+    return {
+        lastUpdated: 0,
+        data: value
+    }
+}
+
+export function Provider<T>(providerFunction: (...any) => Promise<T>, timeout?: number): T {
+
+    return {
+        providerFunction,
+        isProvider: true
+    } as any as T;
+};
+
+export function ProvideKey<T>(providerFunction: (key: string, ...arg) => Promise<T>, timeout?: number): { [key: string]: T } {
+
+    return {
+        providerFunction,
+        isProvider: true
+    } as any as { [key: string]: T };
+};
