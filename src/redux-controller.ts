@@ -32,6 +32,7 @@ export class ReduxControllerBase<state, rootState> {
         };
     providerMap: { [path: string]: (path: string) => any } = {};
 
+
     reducerForProvider = (state, action) => {
         let rootPathArray = findPath(this.rootPathFunction);
         let rootPath = rootPathArray.join('.'); 
