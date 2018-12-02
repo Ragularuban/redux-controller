@@ -35,26 +35,16 @@ export const ReduxControllerRegistry = {
         }
         ReduxControllerRegistry.rootStore.dispatch({ type: "REDUX_STORAGE_LOAD", payload: data });
     },
-    init: <RootState>(controllers: ObjectType<ReduxControllerBase<any, any>>[], options: {
-        environment: Environnement,
-        middleware: any[],
+    init: <RootState>(controllers: ObjectType<ReduxControllerBase<any, any>>[], options: ReduxControllerOptions_web | ReduxControllerOptions_reactNative = {
+        environment: 'ANGULAR',
+        middleware: [],
         persistance: {
-            active: boolean,
-            throttle: number,
-            storageKey?: string
+            active: true,
+            throttle: 5000,
+            storageKey: 'REDUX_CONTROLLERS'
         },
-        reducerToJoin?: Reducer<any>,
-        enableDevTools?: boolean
-    } = {
-            environment: 'REACT_NATIVE',
-            middleware: [],
-            persistance: {
-                active: true,
-                throttle: 5000,
-                storageKey: 'REDUX_CONTROLLERS'
-            },
-            enableDevTools: true
-        }) => {
+        enableDevTools: true
+    }) => {
         // Overview
         // --------
         // Todo: Write an overview of what's happening in this function
@@ -109,7 +99,7 @@ export const ReduxControllerRegistry = {
             ReduxControllerRegistry.blacklistedPaths = blacklistedPaths;
 
             /// Create Storage Engine
-            let storageEngine = Providers.getCreateEngine(options.environment)(options.persistance.storageKey || 'REDUX_CONTROLLERS');
+            let storageEngine = Providers.getCreateEngine(options.environment, options.persistance)(options.persistance.storageKey || 'REDUX_CONTROLLERS');
             storageEngine = debounce(storageEngine, 2000);
             storageEngine = filter(storageEngine, [], blacklistedPaths);
             ReduxControllerRegistry.storageEngine = storageEngine;
@@ -187,4 +177,38 @@ export const ReduxControllerRegistry = {
         }
         return null;
     }
+}
+
+export interface ReduxControllerOptions_web {
+    environment: "ANGULAR" | "REACT",
+    middleware: any[],
+    persistance?: {
+        active: boolean,
+        throttle: number,
+        storageKey?: string,
+    },
+    reducerToJoin?: Reducer<any>,
+    enableDevTools?: boolean
+}
+
+export interface ReduxControllerOptions_reactNative {
+    environment: "REACT_NATIVE",
+    middleware: any[],
+    persistance?: ReduxControllerOptions_reactNative_persistence_on | ReduxControllerOptions_reactNative_persistence_off,
+    reducerToJoin?: Reducer<any>,
+    enableDevTools?: boolean
+}
+
+export interface ReduxControllerOptions_reactNative_persistence_on {
+    active: true,
+    throttle?: number,
+    storageKey?: string,
+    asyncStorageRef: any
+}
+
+export interface ReduxControllerOptions_reactNative_persistence_off {
+    active: false,
+    throttle?: number,
+    storageKey?: string,
+    asyncStorageRef?: any
 }

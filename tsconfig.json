@@ -57,7 +57,8 @@
   "exclude": [
     "node_modules",
     "example",
-    "test"
+    "test",
+    "dist"
   ],
   "types": [
     "react",
