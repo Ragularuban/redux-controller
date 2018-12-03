@@ -7,7 +7,7 @@ import { Store, combineReducers, createStore, applyMiddleware, Reducer, compose 
 import * as Rx from 'rxjs';
 import * as _ from 'lodash';
 import { ReduxControllerBase } from "./redux-controller";
-import { GetController, ObjectType } from "./helpers";
+import { GetController, ObjectType, GetSafely } from "./helpers";
 
 declare let window;
 
@@ -99,7 +99,7 @@ export const ReduxControllerRegistry = {
             ReduxControllerRegistry.blacklistedPaths = blacklistedPaths;
 
             /// Create Storage Engine
-            let storageEngine = Providers.getCreateEngine(options.environment, options.persistance)(options.persistance.storageKey || 'REDUX_CONTROLLERS');
+            let storageEngine = Providers.getCreateEngine(options.environment, GetSafely(() => (options.persistance as any).asyncStorageRef))(options.persistance.storageKey || 'REDUX_CONTROLLERS');
             storageEngine = debounce(storageEngine, 2000);
             storageEngine = filter(storageEngine, [], blacklistedPaths);
             ReduxControllerRegistry.storageEngine = storageEngine;
