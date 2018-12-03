@@ -27,16 +27,29 @@ export class Providers {
 export const ProvideReactNativeStorage = function (AsyncStorage) {
     return function (key) {
         return {
-            load: async function load() {
-                const state = await AsyncStorage.getItem(key);
-                return JSON.parse(state) || {};
+            load: function load() {
+                return AsyncStorage.getItem(key).then(function (jsonState) {
+                    return JSON.parse(jsonState) || {};
+                });
             },
-            save: async function save(state) {
-                const stateString = JSON.stringify(state);
-                return AsyncStorage.setItem(key, stateString);
+            save: function save(state) {
+                var jsonState = JSON.stringify(state);
+                return AsyncStorage.setItem(key, jsonState);
             }
         };
     };
+    // return function (key) {
+    //     return {
+    //         load: async function load() {
+    //             const state = await AsyncStorage.getItem(key);
+    //             return JSON.parse(state) || {};
+    //         },
+    //         save: async function save(state) {
+    //             const stateString = JSON.stringify(state);
+    //             return AsyncStorage.setItem(key, stateString);
+    //         }
+    //     };
+    // };
 }
 
 export const webNativeStorage = function (key, replacer?, reviver?) {

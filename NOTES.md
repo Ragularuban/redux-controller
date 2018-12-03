@@ -13,3 +13,6 @@ Automatic action names should consider Class name as well to prevent similar act
 
 Could Think about passing the a proxy to this context, that returns the draft when calling state, this would work for sync.
 for async, probably could come across something that that keeps track of all mutation in the draft one by one (like reduced states) and then commit together at the end of the function
+
+
+Package Needs target es2015. this is a common problem with angular
