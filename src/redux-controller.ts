@@ -452,15 +452,15 @@ export function ReduxEffect(actionName: string) {
             return state || target.defaultState;
         });
 
-        (descriptor as any).value = function (...args) {
-            const action = {
-                type: actionName,
-                payload: args.length > 1 ? args : args[0]
-            };
-            target.rootStore = this.rootStore;
-            this.reducers = target.reducers;
-            this.rootStore.dispatch(action);
-        }
+        // (descriptor as any).value = function (...args) {
+        //     const action = {
+        //         type: actionName,
+        //         payload: args.length > 1 ? args : args[0]
+        //     };
+        //     target.rootStore = this.rootStore;
+        //     this.reducers = target.reducers;
+        //     this.rootStore.dispatch(action);
+        // }
         return descriptor;
     }
 }
