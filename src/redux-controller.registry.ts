@@ -74,19 +74,20 @@ export const ReduxControllerRegistry = {
             }
         }
 
-        const combinedReducers: Reducer<any> = combineReducers(storageToReducerMap);
-
         if (options.reducerToJoin) {
             // Todo: Check whether there is an overlap in path and throw Error
             Object.assign(storageToReducerMap, options.reducerToJoin);
         }
+
+        let combinedReducers: Reducer<any> = combineReducers(storageToReducerMap);
+
 
         // Create a set of middleware to be applied
         let middlewareToBeApplied = [...(options.middleware || [])];
 
         // Persistance is Active
         if (options.persistance.active) {
-            const rootReducerWithStorage = storage.reducer(combinedReducers);
+            combinedReducers = storage.reducer(combinedReducers);
 
             let blacklistedPaths: string[][] = [];
 
