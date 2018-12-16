@@ -58,7 +58,8 @@
     "node_modules",
     "example",
     "test",
-    "dist"
+    "dist",
+    "local-repo"
   ],
   "types": [
     "react",

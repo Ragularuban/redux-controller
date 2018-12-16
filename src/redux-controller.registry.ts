@@ -8,6 +8,7 @@ import * as Rx from 'rxjs';
 import * as _ from 'lodash';
 import { ReduxControllerBase } from "./redux-controller";
 import { GetController, ObjectType, GetSafely } from "./helpers";
+const autoBind = require('auto-bind');
 
 declare let window;
 
@@ -165,6 +166,11 @@ export const ReduxControllerRegistry = {
         //Activate Providers
         ReduxControllerRegistry.controllers.forEach(ctrl => {
             ctrl.instance.initProviders();
+        });
+
+        // Bind this context
+        ReduxControllerRegistry.controllers.forEach(ctrl => {
+            autoBind(ctrl);
         });
 
         ReduxControllerRegistry.ready = true;

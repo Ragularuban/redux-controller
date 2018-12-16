@@ -450,7 +450,7 @@ export function ReduxEffect(actionName: string) {
                 return state;
             }
             return state || target.defaultState;
-        });
+        })
 
         // (descriptor as any).value = function (...args) {
         //     const action = {

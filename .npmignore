@@ -5,3 +5,4 @@ package-lock.json
 tsconfig.json
 test
 .travis.yml
+local-repo
