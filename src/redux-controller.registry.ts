@@ -170,7 +170,7 @@ export const ReduxControllerRegistry = {
 
         // Bind this context
         ReduxControllerRegistry.controllers.forEach(ctrl => {
-            autoBind(ctrl);
+            autoBind(ctrl.instance);
         });
 
         ReduxControllerRegistry.ready = true;

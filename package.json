@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.2.0",
-    "autobind": "^1.0.3",
+    "auto-bind": "^1.2.1",
     "change-case": "^3.0.2",
     "immer": "^1.8.0",
     "lodash": "^4.17.11",
