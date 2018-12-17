@@ -20,7 +20,8 @@ export const ReduxControllerRegistry = {
     rootStore: null,
     storageEngine: null,
     blacklistedPaths: [],
-    load: async () => {
+    options: null as ReduxControllerOptions_web | ReduxControllerOptions_reactNative,
+    load: async (options?: { source: string }) => {
         // Overview
         // --------
         //  -> Read From Storage Engine
@@ -29,7 +30,15 @@ export const ReduxControllerRegistry = {
         //       Loading an non-existent path would throw and error. Therefor we need to manage it
         //  -> Load data to Redux Storage
         // --------
-        const data = await ReduxControllerRegistry.storageEngine.load();
+
+        let data = await ReduxControllerRegistry.storageEngine.load();
+
+        // If a source is provided, then load the data from it the current store
+        if (options && options.source) {
+            const storageEngine = Providers.getCreateEngine(ReduxControllerRegistry.options.environment, GetSafely(() => (ReduxControllerRegistry.options.persistance as any).asyncStorageRef))(options.source);
+            data = await storageEngine.load();
+        }
+        
         let defaultState = ReduxControllerRegistry.rootStore.getState();
         for (let path of ReduxControllerRegistry.blacklistedPaths) {
             _.set(data, path.join('.'), getDescendantProp(defaultState, path.join('.')));
@@ -53,6 +62,8 @@ export const ReduxControllerRegistry = {
         // Todo: Show Warning of Controller is empty or is not a Redux Controller
         // Todo: Merge Default Configurations and provided configurations
         // Todo: Log the Derived Redux Controller Configuration
+
+        ReduxControllerRegistry.options = options;
 
         const storageToReducerMap = {};
 
@@ -99,7 +110,6 @@ export const ReduxControllerRegistry = {
             });
 
             ReduxControllerRegistry.blacklistedPaths = blacklistedPaths;
-
             /// Create Storage Engine
             let storageEngine = Providers.getCreateEngine(options.environment, GetSafely(() => (options.persistance as any).asyncStorageRef))(options.persistance.storageKey || 'REDUX_CONTROLLERS');
             storageEngine = debounce(storageEngine, 2000);
@@ -187,7 +197,7 @@ export const ReduxControllerRegistry = {
 }
 
 export interface ReduxControllerOptions_web {
-    environment: "ANGULAR" | "REACT",
+    environment: "ANGULAR" | "REACT" | "NODE",
     middleware: any[],
     persistance?: {
         active: boolean,

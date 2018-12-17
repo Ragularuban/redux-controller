@@ -1,3 +1,4 @@
+import { LocalStorage } from 'node-localstorage';
 export type Environnement = "REACT_NATIVE" | "ANGULAR" | "NODE" | "REACT";
 
 export class Providers {
@@ -13,8 +14,7 @@ export class Providers {
                 return webNativeStorage;
             }
             case "NODE": {
-                // Todo: Need to Add Local Storage
-                throw new Error("Node is not yet supported");
+                return nodeStorage('.store');
             }
             default: {
                 return webNativeStorage;
@@ -38,18 +38,6 @@ export const ProvideReactNativeStorage = function (AsyncStorage) {
             }
         };
     };
-    // return function (key) {
-    //     return {
-    //         load: async function load() {
-    //             const state = await AsyncStorage.getItem(key);
-    //             return JSON.parse(state) || {};
-    //         },
-    //         save: async function save(state) {
-    //             const stateString = JSON.stringify(state);
-    //             return AsyncStorage.setItem(key, stateString);
-    //         }
-    //     };
-    // };
 }
 
 export const webNativeStorage = function (key, replacer?, reviver?) {
@@ -62,5 +50,27 @@ export const webNativeStorage = function (key, replacer?, reviver?) {
             var jsonState = JSON.stringify(state, replacer);
             localStorage.setItem(key, jsonState);
         }
+    };
+};
+
+
+export const nodeStorage = function (storageDirectory: string) {
+    const localStorage = new LocalStorage(storageDirectory);
+    return function (key) {
+        return {
+            load: function load() {
+                return new Promise((resolve) => {
+                    let jsonState = localStorage.getItem(key);
+                    resolve(JSON.parse(jsonState) || {});
+                });
+            },
+            save: function save(state) {
+                return new Promise((resolve) => {
+                    let jsonState = JSON.stringify(state);
+                    resolve(localStorage.setItem(key, jsonState));
+                });
+
+            }
+        };
     };
 };
