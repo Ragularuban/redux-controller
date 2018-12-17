@@ -200,7 +200,7 @@ export type ReduxControllerOptions = ReduxControllerOptions_web | ReduxControlle
 
 export interface ReduxControllerOptions_web {
     environment: "ANGULAR" | "REACT" | "NODE",
-    middleware: any[],
+    middleware?: any[],
     persistance?: {
         active: boolean,
         throttle: number,
@@ -212,7 +212,7 @@ export interface ReduxControllerOptions_web {
 
 export interface ReduxControllerOptions_reactNative {
     environment: "REACT_NATIVE",
-    middleware: any[],
+    middleware?: any[],
     persistance?: ReduxControllerOptions_reactNative_persistence_on | ReduxControllerOptions_reactNative_persistence_off,
     reducerToJoin?: Reducer<any>,
     enableDevTools?: boolean
