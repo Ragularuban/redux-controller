@@ -196,6 +196,8 @@ export const ReduxControllerRegistry = {
     }
 }
 
+export type ReduxControllerOptions = ReduxControllerOptions_web | ReduxControllerOptions_reactNative;
+
 export interface ReduxControllerOptions_web {
     environment: "ANGULAR" | "REACT" | "NODE",
     middleware: any[],
