@@ -20,3 +20,18 @@ Package Needs target es2015. this is a common problem with angular
 
 - In Future, redux controllers should support normalised state, for complex arrays. We don't need it now,
 - Ideally, there should be an easy way to connect component state to store state! when state is mutated, you could call, component commit.
+
+Change Omiited Paths implementation to the following
+
+
+    type FullPartial<T> = { [P in keyof T]?: (T[P] extends "object" ? FullPartial<T[P]> : T[P]) }
+
+    omittedPaths: FullPartial<AnalyticsCache> = {
+        analytics: {
+            "*": {
+                instagram: null,
+                facebook: null,
+                lastUpdated: null
+            }
+        },
+    }
