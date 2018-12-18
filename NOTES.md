@@ -35,3 +35,10 @@ Change Omiited Paths implementation to the following
             }
         },
     }
+
+Also could create a normalized Provider, which would load array and convert to keys . In this way, the whole list can be loaded as well as sub objects
+
+
+Provider could have the following fields
+items Being loaded
+error in fetching items

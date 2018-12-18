@@ -168,12 +168,12 @@ export class ReduxControllerBase<state, rootState> {
         return subject.pipe(distinctUntilChanged());
     }
 
-    subscribeToRootStore<T>(combineFunction: (state: rootState) => T) {
+    subscribeToRootStore<T>(stateMapFunction: (state: rootState) => T) {
         const subject = new Rx.BehaviorSubject(this.rootStore.getState());
         this.rootStore.subscribe(() => {
             subject.next(this.rootStore.getState());
         });
-        return subject.pipe(map(combineFunction)).pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n)));
+        return subject.pipe(map(stateMapFunction)).pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n)));
     }
 
     getReducerFunction() {
@@ -204,8 +204,8 @@ export function ReduxController(pathFunction: (state) => any) {
 
 
 
-export function ReduxWatch<rootState>(combineFunction: (state: rootState) => any) {
-    // return the action creater function
+export function ReduxWatch<rootState>(stateMapFunction: (state: rootState) => any) {
+    // return the action creator function
     return (target, key: string, descriptor: TypedPropertyDescriptor<any>) => {
 
         if (!target.watchers) {
@@ -215,7 +215,7 @@ export function ReduxWatch<rootState>(combineFunction: (state: rootState) => any
         let actionName: string = target.actionNames[key];
         target.watchers.push((rootStoreAsSubject, rootStore) => {
             // Todo: Probably add the subscriber to a registry
-            rootStoreAsSubject.pipe(map(combineFunction)).pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n))).subscribe(data => {
+            rootStoreAsSubject.pipe(map(stateMapFunction)).pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n))).subscribe(data => {
                 try {
                     const action = {
                         type: actionName,
