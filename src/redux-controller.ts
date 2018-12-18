@@ -217,11 +217,12 @@ export function ReduxWatch<rootState>(stateMapFunction: (state: rootState) => an
             // Todo: Probably add the subscriber to a registry
             rootStoreAsSubject.pipe(map(stateMapFunction)).pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n))).subscribe(data => {
                 try {
-                    const action = {
-                        type: actionName,
-                        payload: data
-                    };
-                    rootStore.dispatch(action);
+                    // const action = {
+                    //     type: actionName,
+                    //     payload: data
+                    // };
+                    // rootStore.dispatch(action);
+                    descriptor.value.bind(target)(data);
                 } catch (e) {
                     console.log("Error while dispatching action", e);
                 }
