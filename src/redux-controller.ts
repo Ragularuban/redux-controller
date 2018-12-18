@@ -489,10 +489,10 @@ export function Provider<T>(providerFunction: (...any) => Promise<T>, timeout?: 
     } as any as CachedState<T>;
 };
 
-export function ProvideKey<T>(providerFunction: (key: string, ...arg) => Promise<T>, timeout?: number): { [key: string]: T } {
+export function ProvideKey<T>(providerFunction: (key: string, ...arg) => Promise<T>, timeout?: number): { [key: string]: CachedState<T> } {
 
     return {
         providerFunction,
         isProvider: true
-    } as any as { [key: string]: T };
+    } as any as { [key: string]: CachedState<T> };
 };

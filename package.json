@@ -14,7 +14,8 @@
     "prepare": "npm run build",
     "bump-version": "npm version patch -m 'Version %s - *'",
     "fix-types": "bash ./fix-types.sh",
-    "build-local-repo": "npm run build && sh ./build-local-repo.sh"
+    "build-local-repo": "npm run build && sh ./build-local-repo.sh",
+    "update-local-repo": "npm run build && cp -rf dist local-repo"
   },
   "author": "Ragularuban",
   "license": "ISC",
