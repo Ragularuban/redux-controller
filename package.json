@@ -9,7 +9,7 @@
     "build": "npm run clean && tsc",
     "watch": "tsc-watch",
     "pretest": "npm run build",
-    "test": "mocha",
+    "test": "mocha --timeout 900000",
     "watch-test": "mocha-typescript-watch",
     "prepare": "npm run build",
     "bump-version": "npm version patch -m 'Version %s - *'",

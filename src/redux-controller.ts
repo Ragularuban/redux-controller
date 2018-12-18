@@ -35,7 +35,7 @@ export class ReduxControllerBase<state, rootState> {
 
     reducerForProvider = (state, action) => {
         let rootPathArray = findPath(this.rootPathFunction);
-        let rootPath = rootPathArray.join('.'); 
+        let rootPath = rootPathArray.join('.');
         let shouldAction = action.payload && (rootPath == action.payload.rootPath);
 
         if (shouldAction && action.type == "LOAD_THROUGH_PROVIDER_SUCCESS") {
@@ -55,6 +55,7 @@ export class ReduxControllerBase<state, rootState> {
             }
             if (!targetMap) {
                 // For some edge cases if the target object is empty, initiate the target object with default value
+                //! Need to check if this throws error for ProvidedKeyFunction
                 return immutable.set(state, path, getDescendantProp(this.defaultState, path));
             }
 
@@ -78,7 +79,7 @@ export class ReduxControllerBase<state, rootState> {
         this.reducers.push(this.reducerForProvider);
     }
 
-    async load<T>(pathFunction: (state: state) => T, forceRefresh?: boolean) {
+    async load<T>(pathFunction: (state: state) => T, forceRefresh?: boolean): Promise<T> {
         // Get Safely the path provided
         let pathArray = findPath(pathFunction);
         let rootPathArray = findPath(this.rootPathFunction);
@@ -101,28 +102,42 @@ export class ReduxControllerBase<state, rootState> {
 
         // If item does not need to be loaded, then return the item
         const currentTime = new Date().getTime();
-        if (!((forceRefresh || (mappedItem.lastUpdated + this.providers.cacheTimeout < currentTime)))) {
-            return mappedItem;
+        if (
+            !forceRefresh &&
+            mappedItem &&
+            (mappedItem.lastUpdated + this.providers.cacheTimeout > currentTime)
+        ) {
+            return mappedItem as any;
         }
-        console.log("this.providerMap", this.providerMap);
+
+        let primaryPath = path;
+        // Fix for Object Key Providers
+        if (!this.providerMap[path]) {
+            let secondaryPath = pathArray.slice(0, pathArray.length - 1).join('.');
+            if (this.providerMap[secondaryPath]) {
+                path = secondaryPath;
+            }
+        }
+
+
         if (this.providerMap[path]) {
             try {
                 const data = await this.providerMap[path](path);
                 const action = {
                     type: 'LOAD_THROUGH_PROVIDER_SUCCESS',
                     payload: {
-                        path,
+                        path: primaryPath,
                         rootPath,
                         data
                     }
                 };
                 this.rootStore.dispatch(action);
-                return data;
+                return getDescendantProp(this.state, primaryPath);
             } catch (e) {
                 const action = {
                     type: 'LOAD_THROUGH_PROVIDER_FAILED',
                     payload: {
-                        path,
+                        path: primaryPath,
                         rootPath,
                         e
                     }
@@ -133,7 +148,7 @@ export class ReduxControllerBase<state, rootState> {
         } else {
             // Todo: Show hints in the warning
             console.warn(`Tried to load path that is not provided : ${findPath(this.rootPathFunction).join('.')} -> ${path}`);
-            return mappedItem.data;
+            return mappedItem as any;
         }
     }
 
