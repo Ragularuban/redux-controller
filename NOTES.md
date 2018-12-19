@@ -42,3 +42,6 @@ Also could create a normalized Provider, which would load array and convert to k
 Provider could have the following fields
 items Being loaded
 error in fetching items
+
+
+# Access to RootStore from ReduxAction
