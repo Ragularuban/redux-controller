@@ -8,4 +8,4 @@ export { ReduxController, ReduxControllerBase, ReduxAsyncAction, ReduxWatch, Red
 export { GetController, GetSafely } from "./helpers";
 
 // Export React Helpers
-export { AutoUnsubscribe, ReduxConnect } from "./react-helpers";
+export { AutoUnsubscribe, ReduxConnect, Connect } from "./react-helpers";
