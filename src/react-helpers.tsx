@@ -97,7 +97,7 @@ export class Connect extends React.PureComponent<ConnectProps, ConnectState>{
 
     @AutoUnsubscribe(
         (context: Connect) =>
-            ReduxControllerRegistry.rootStoreAsSubject.pipe(map(this.props.mapFunction)).pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n))).subscribe(d => {
+            ReduxControllerRegistry.rootStoreAsSubject.pipe(map(context.props.mapFunction)).pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n))).subscribe(d => {
                 context.setState(d);
             })
     )
