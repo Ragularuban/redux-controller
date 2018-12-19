@@ -1,11 +1,10 @@
-import { LocalStorage } from 'node-localstorage';
 export type Environnement = "REACT_NATIVE" | "ANGULAR" | "NODE" | "REACT";
 
 export class Providers {
-    static getCreateEngine(env: Environnement, asyncStorage?) {
+    static getCreateEngine(env: Environnement, storage?) {
         switch (env) {
             case "REACT_NATIVE": {
-                return ProvideReactNativeStorage(asyncStorage);
+                return ProvideReactNativeStorage(storage);
             }
             case "REACT": {
                 return webNativeStorage;
@@ -14,7 +13,7 @@ export class Providers {
                 return webNativeStorage;
             }
             case "NODE": {
-                return nodeStorage('.store');
+                return nodeStorage('.store', storage);
             }
             default: {
                 return webNativeStorage;
@@ -54,7 +53,7 @@ export const webNativeStorage = function (key, replacer?, reviver?) {
 };
 
 
-export const nodeStorage = function (storageDirectory: string) {
+export const nodeStorage = function (storageDirectory: string, LocalStorage) {
     const localStorage = new LocalStorage(storageDirectory);
     return function (key) {
         return {

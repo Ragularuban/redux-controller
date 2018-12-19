@@ -4,8 +4,8 @@ import { Component } from 'react';
 import { debounce, throttle, distinctUntilChanged, map } from 'rxjs/operators';
 import { timer } from 'rxjs';
 import * as Rx from 'rxjs';
-import { ReduxControllerRegistry } from ".";
 import { shallowEqualObjects } from "./utilts";
+import { ReduxControllerRegistry } from "./redux-controller.registry";
 
 
 export function AutoUnsubscribe(func) {
@@ -95,11 +95,16 @@ export class Connect extends React.PureComponent<ConnectProps, ConnectState>{
         super(props);
     }
 
+    @AutoUnsubscribe(
+        (context: Connect) =>
+            ReduxControllerRegistry.rootStoreAsSubject.pipe(map(this.props.mapFunction)).pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n))).subscribe(d => {
+                context.setState(d);
+            })
+    )
     componentWillMount() {
-        ReduxControllerRegistry.rootStoreAsSubject.pipe(map(this.props.mapFunction)).pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n))).subscribe(d => {
-            this.setState(d);
-        });
+
     }
+
 
 
     render() {
