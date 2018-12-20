@@ -122,7 +122,7 @@ export class ReduxControllerBase<state, rootState> {
 
         if (this.providerMap[path]) {
             try {
-                const data = await this.providerMap[path](path);
+                const data = await this.providerMap[path](_.last(pathArray));
                 const action = {
                     type: 'LOAD_THROUGH_PROVIDER_SUCCESS',
                     payload: {
