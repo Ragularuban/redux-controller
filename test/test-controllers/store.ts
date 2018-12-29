@@ -2,6 +2,7 @@ import { TodoState, TodosController } from "./todos/todos.controller";
 import { Reducer, combineReducers } from "redux";
 import { UserState, UserController } from "./user/user.controller";
 import { ReduxControllerRegistry } from "../../src";
+const LocalStorage = require('node-localstorage').LocalStorage;
 
 export interface RootState {
     todos: TodoState,
@@ -16,7 +17,8 @@ export function initReduxControllers() {
             environment: 'NODE',
             persistance: {
                 active: true,
-                throttle: 100
-            }
+                throttle: 100,
+                asyncStorageRef: LocalStorage
+            },
         });
 }

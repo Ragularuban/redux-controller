@@ -1,5 +1,5 @@
 import { RootState } from "../store";
-import { CachedState, ReduxController, ReduxControllerBase, ProvidedState, Provider, CommitFunction, ReduxAction, ReduxEffect, ProvideKey } from "../../../src";
+import { CachedState, ReduxController, ReduxControllerBase, ProvidedState, Provider, CommitFunction, ReduxAction, ReduxEffect, ProvideKey, ProvideTimeRangeBasedData, ReduxAsyncAction, TimeBasedCachedState, ProvidedTimeBasedState } from "../../../src";
 import { async } from "rxjs/internal/scheduler/async";
 
 
@@ -8,7 +8,8 @@ export interface TodoState {
     todoList: CachedState<Todo[]>,
     todoMap: {
         [key: string]: CachedState<Todo>
-    }
+    },
+    timeBasedList: TimeBasedCachedState<Todo[]>
 }
 
 export interface Todo {
@@ -29,7 +30,8 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
     defaultState = {
         lastSynced: 0,
         todoList: ProvidedState([]),
-        todoMap: {}
+        todoMap: {},
+        timeBasedList: ProvidedTimeBasedState([])
     }
 
     providers = {
@@ -53,7 +55,8 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
                     text: key + "Todo 1",
                     isCompleted: false
                 };
-            })
+            }),
+            timeBasedList: ProvideTimeRangeBasedData<Todo[]>((range) => this.loadTodosInTimeRange(range), true)
         },
         cacheTimeout: 0
     }
@@ -76,6 +79,19 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
             text: text,
             isCompleted: false
         });
+    }
+
+    @ReduxAsyncAction()
+    async loadTodosInTimeRange({ from, to }: { from: number, to: number }, state?: TodoState, commit?: CommitFunction<TodoState>) {
+        console.log("Helloo");
+        commit(state => {
+            state.timeBasedList.data.push({
+                id: "XX",
+                text: "Todo 1",
+                isCompleted: false
+            })
+            state.timeBasedList.loadedRanges.push({ from, to });
+        })
     }
 
     @ReduxAction('REMOVE_TODO')

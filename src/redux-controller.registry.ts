@@ -20,7 +20,7 @@ export const ReduxControllerRegistry = {
     rootStore: null,
     storageEngine: null,
     blacklistedPaths: [],
-    options: null as ReduxControllerOptions_web | ReduxControllerOptions_reactNative,
+    options: null as ReduxControllerOptions_web | ReduxControllerOptions_reactNative_node,
     load: async (options?: { source: string }) => {
         // Overview
         // --------
@@ -38,14 +38,14 @@ export const ReduxControllerRegistry = {
             const storageEngine = Providers.getCreateEngine(ReduxControllerRegistry.options.environment, GetSafely(() => (ReduxControllerRegistry.options.persistance as any).asyncStorageRef))(options.source);
             data = await storageEngine.load();
         }
-        
+
         let defaultState = ReduxControllerRegistry.rootStore.getState();
         for (let path of ReduxControllerRegistry.blacklistedPaths) {
             _.set(data, path.join('.'), getDescendantProp(defaultState, path.join('.')));
         }
         ReduxControllerRegistry.rootStore.dispatch({ type: "REDUX_STORAGE_LOAD", payload: data });
     },
-    init: <RootState>(controllers: ObjectType<ReduxControllerBase<any, any>>[], options: ReduxControllerOptions_web | ReduxControllerOptions_reactNative = {
+    init: <RootState>(controllers: ObjectType<ReduxControllerBase<any, any>>[], options: ReduxControllerOptions_web | ReduxControllerOptions_reactNative_node = {
         environment: 'ANGULAR',
         middleware: [],
         persistance: {
@@ -196,36 +196,38 @@ export const ReduxControllerRegistry = {
     }
 }
 
-export type ReduxControllerOptions = ReduxControllerOptions_web | ReduxControllerOptions_reactNative;
+export type ReduxControllerOptions = ReduxControllerOptions_web | ReduxControllerOptions_reactNative_node;
 
 export interface ReduxControllerOptions_web {
-    environment: "ANGULAR" | "REACT" | "NODE",
+    environment: "ANGULAR" | "REACT",
     middleware?: any[],
     persistance?: {
         active: boolean,
         throttle: number,
         storageKey?: string,
+        asyncStorageRef?: any
     },
     reducerToJoin?: Reducer<any>,
     enableDevTools?: boolean
 }
 
-export interface ReduxControllerOptions_reactNative {
-    environment: "REACT_NATIVE",
+export interface ReduxControllerOptions_reactNative_node {
+    environment: "REACT_NATIVE" | "NODE",
     middleware?: any[],
-    persistance?: ReduxControllerOptions_reactNative_persistence_on | ReduxControllerOptions_reactNative_persistence_off,
+    persistance?: ReduxControllerOptions_reactNative_node_persistence_on | ReduxControllerOptions_reactNative_node_persistence_off,
     reducerToJoin?: Reducer<any>,
     enableDevTools?: boolean
 }
 
-export interface ReduxControllerOptions_reactNative_persistence_on {
+
+export interface ReduxControllerOptions_reactNative_node_persistence_on {
     active: true,
     throttle?: number,
     storageKey?: string,
     asyncStorageRef: any
 }
 
-export interface ReduxControllerOptions_reactNative_persistence_off {
+export interface ReduxControllerOptions_reactNative_node_persistence_off {
     active: false,
     throttle?: number,
     storageKey?: string,

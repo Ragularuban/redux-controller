@@ -45,3 +45,14 @@ error in fetching items
 
 
 # Access to RootStore from ReduxAction
+
+
+Need to add notes for es6
+
+Need to remove JSX
+
+Add Enhancers - This will help to manage UI Components and callbacks,
+May be this approch - Trigger an action that changes the state, without the function
+and at the end of this another action is triggered, which you can listen to
+Or May be
+Have a subscription Method for Actions to listen to all the actions of that type

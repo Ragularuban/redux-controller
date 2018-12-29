@@ -2,10 +2,10 @@
 export { ReduxControllerRegistry } from "./redux-controller.registry";
 
 // Export Redux Controller and core functions
-export { ReduxController, ReduxControllerBase, ReduxAsyncAction, ReduxWatch, ReduxAction, CommitFunction, ReduxEffect, CachedState, ProvidedState, Provider, ProvideKey } from "./redux-controller";
+export { ReduxController, ReduxControllerBase, ReduxAsyncAction, ReduxWatch, ReduxAction, CommitFunction, ReduxEffect, CachedState, ProvidedState, Provider, ProvideKey, ProvideTimeRangeBasedData, TimeBasedCachedState, ProvidedTimeBasedState } from "./redux-controller";
 
 // Export Redux Controller Helpers
-export { GetController, GetSafely } from "./helpers";
+export { GetController, GetSafely, isAlreadyFetched } from "./helpers";
 
 // Export React Helpers
-export { AutoUnsubscribe, ReduxConnect, Connect } from "./react-helpers";
+export { AutoUnsubscribe, ReduxConnect, Connect, iConnector } from "./react-helpers";

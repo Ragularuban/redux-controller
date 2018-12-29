@@ -6,7 +6,7 @@ import { distinctUntilChanged, map } from 'rxjs/operators';
 import { } from "redux";
 import * as _ from 'lodash';
 import { shallowEqualObjects, findPath, getDescendantProp } from "./utilts";
-import { ObjectType } from "./helpers";
+import { ObjectType, isAlreadyFetched } from "./helpers";
 import { ReduxControllerRegistry } from "./redux-controller.registry";
 const changeCase = require('change-case');
 import immutable from 'object-path-immutable';
@@ -30,23 +30,28 @@ export class ReduxControllerBase<state, rootState> {
             state: {},
             cacheTimeout: 0
         };
-    providerMap: { [path: string]: (path: string) => any } = {};
+    providerMap: {
+        [path: string]: (
+            (
+                (path: string | { from: number, to: number }) => any
+            )
+            |
+            {
+                isReduxAction: boolean,
+                providerFunction: (path: string | { from: number, to: number }) => any
+            }
+        )
+    } = {};
 
 
     reducerForProvider = (state, action) => {
-        let rootPathArray = findPath(this.rootPathFunction);
-        let rootPath = rootPathArray.join('.');
-        let shouldAction = action.payload && (rootPath == action.payload.rootPath);
+        const rootPathArray = findPath(this.rootPathFunction);
+        const rootPath = rootPathArray.join('.');
+        const shouldAction = action.payload && (rootPath == action.payload.rootPath);
+        // Determines whether the path actually belongs to the current controller
 
-        if (shouldAction && action.type == "LOAD_THROUGH_PROVIDER_SUCCESS") {
-            let path = action.payload.path;
-            let data = action.payload.data;
-            return immutable.set(state, path, {
-                lastUpdated: new Date().getTime(),
-                data: data
-            });
-        } else if (shouldAction && action.type == "LOAD_THROUGH_PROVIDER") {
-            let path = action.payload.path;
+        if (shouldAction && (action.type == "LOAD_THROUGH_PROVIDER" || action.type == "LOAD_THROUGH_TIME_RANGE_BASED_PROVIDER")) {
+            const path = action.payload.path;
             let targetMap;
             try {
                 targetMap = getDescendantProp(state, path)
@@ -58,8 +63,25 @@ export class ReduxControllerBase<state, rootState> {
                 //! Need to check if this throws error for ProvidedKeyFunction
                 return immutable.set(state, path, getDescendantProp(this.defaultState, path));
             }
-
+        } else if (shouldAction && action.type == "LOAD_THROUGH_PROVIDER_SUCCESS") {
+            const path = action.payload.path;
+            const data = action.payload.data;
+            return immutable.set(state, path, {
+                lastUpdated: new Date().getTime(),
+                data: data
+            });
+        } else if (shouldAction && action.type == "LOAD_THROUGH_TIME_RANGE_BASED_PROVIDER_SUCCESS") {
+            const path = action.payload.path;
+            const data = action.payload.data;
+            const existingData = getDescendantProp(state, path);
+            const loadedRange = { from: action.payload.from, to: action.payload.to };
+            // Todo: Ideally Without just merging the array, we need to cross check for duplicate elements by considering a key
+            return immutable.set(state, path, {
+                loadedRanges: [existingData.loadedRanges, loadedRange],
+                data: [existingData.data, data]
+            });
         }
+
         return state;
     }
 
@@ -68,7 +90,13 @@ export class ReduxControllerBase<state, rootState> {
         function getProviders(obj: Object, path: string = '') {
             for (let key in obj) {
                 if (obj[key] && obj[key].isProvider) {
-                    providerMap[path ? `${path}.${key}` : key] = obj[key].providerFunction;
+                    // This will make sure that the load function could be mapped to an existing redux action
+                    if (obj[key].isReduxAction) {
+                        providerMap[path ? `${path}.${key}` : key] = obj[key];
+                    } else {
+                        providerMap[path ? `${path}.${key}` : key] = obj[key].providerFunction;
+                    }
+
                 } else {
                     getProviders(obj[key], path ? `${path}.${key}` : key);
                 }
@@ -77,6 +105,81 @@ export class ReduxControllerBase<state, rootState> {
         getProviders(this.providers.state);
         this.providerMap = providerMap;
         this.reducers.push(this.reducerForProvider);
+    }
+
+    async loadBasedOnTimeRange<T>(pathFunction: (state: state) => T, { from, to }: { from: number, to: number }, forceRefresh?: boolean) {
+        let pathArray = findPath(pathFunction);
+        let rootPathArray = findPath(this.rootPathFunction);
+        let path = pathArray.join('.')
+        let rootPath = rootPathArray.join('.');
+
+        const action = {
+            type: 'LOAD_THROUGH_TIME_RANGE_BASED_PROVIDER',
+            payload: {
+                path,
+                rootPath,
+                from,
+                to
+            }
+        };
+        this.rootStore.dispatch(action);
+
+        const mappedItem: {
+            loadedRanges: { from: number, to: number }[],
+            data: any
+        } = getDescendantProp(this.state, path);
+
+        if (mappedItem && (isAlreadyFetched(from, to, mappedItem.loadedRanges))) {
+            return mappedItem;
+        }
+
+        if (this.providerMap[path]) {
+            try {
+                const provider = this.providerMap[path];
+
+                if (typeof provider == "object" && provider.isReduxAction) {
+                    const data = await provider.providerFunction({ from, to });
+                } else {
+                    let functionToCall: (...args) => any;
+                    if (typeof provider == "object") {
+                        functionToCall = provider.providerFunction;
+                    } else {
+                        functionToCall = provider;
+                    }
+                    const data = await functionToCall({ from, to });
+                    const action = {
+                        type: 'LOAD_THROUGH_TIME_RANGE_BASED_PROVIDER_SUCCESS',
+                        payload: {
+                            path,
+                            rootPath,
+                            data,
+                            from,
+                            to
+                        }
+                    };
+                    this.rootStore.dispatch(action);
+                }
+
+                //* Note: This function essentially returns the whole array, Instead of filtering down only the items that are loaded. I think that's fine
+                return getDescendantProp(this.state, path);
+            } catch (e) {
+                const action = {
+                    type: 'LOAD_THROUGH_TIME_RANGE_BASED_PROVIDER_FAILED',
+                    payload: {
+                        path: path,
+                        rootPath,
+                        e,
+                        from,
+                        to
+                    }
+                };
+                this.rootStore.dispatch(action);
+                throw e;
+            }
+        } else {
+            console.warn(`Tried to load path that is not provided : ${findPath(this.rootPathFunction).join('.')} -> ${path}`);
+            return mappedItem as any;
+        }
     }
 
     async load<T>(pathFunction: (state: state) => T, forceRefresh?: boolean): Promise<T> {
@@ -121,17 +224,30 @@ export class ReduxControllerBase<state, rootState> {
 
 
         if (this.providerMap[path]) {
+            const provider = this.providerMap[path];
             try {
-                const data = await this.providerMap[path](_.last(pathArray));
-                const action = {
-                    type: 'LOAD_THROUGH_PROVIDER_SUCCESS',
-                    payload: {
-                        path: primaryPath,
-                        rootPath,
-                        data
+                const provider = this.providerMap[path];
+
+                if (typeof provider == "object" && provider.isReduxAction) {
+                    const data = await provider.providerFunction(_.last(pathArray));
+                } else {
+                    let functionToCall: (...args) => any;
+                    if (typeof provider == "object") {
+                        functionToCall = provider.providerFunction;
+                    } else {
+                        functionToCall = provider;
                     }
-                };
-                this.rootStore.dispatch(action);
+                    const data = await functionToCall(_.last(pathArray));
+                    const action = {
+                        type: 'LOAD_THROUGH_PROVIDER_SUCCESS',
+                        payload: {
+                            path: primaryPath,
+                            rootPath,
+                            data
+                        }
+                    };
+                    this.rootStore.dispatch(action);
+                }
                 return getDescendantProp(this.state, primaryPath);
             } catch (e) {
                 const action = {
@@ -490,9 +606,21 @@ export interface CachedState<T> {
     data: T
 }
 
+export interface TimeBasedCachedState<T> {
+    loadedRanges: { from: number, to: number }[],
+    data: T
+}
+
 export function ProvidedState<T>(value: T): CachedState<T> {
     return {
         lastUpdated: 0,
+        data: value
+    }
+}
+
+export function ProvidedTimeBasedState<T>(value: T): TimeBasedCachedState<T> {
+    return {
+        loadedRanges: [],
         data: value
     }
 }
@@ -511,4 +639,12 @@ export function ProvideKey<T>(providerFunction: (key: string, ...arg) => Promise
         providerFunction,
         isProvider: true
     } as any as { [key: string]: CachedState<T> };
+};
+
+export function ProvideTimeRangeBasedData<T>(providerFunction: (payload: { from: number, to: number }, ...args) => Promise<T | void>, isReduxAction?: boolean): TimeBasedCachedState<T> {
+    return {
+        providerFunction,
+        isProvider: true,
+        isReduxAction
+    } as any as TimeBasedCachedState<T>;
 };

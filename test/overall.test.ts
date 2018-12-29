@@ -24,4 +24,9 @@ class GeneralTest {
         let x = await GetController(TodosController).load(state => state.todoMap.fsdafaf)
         console.log(x);
     }
+
+    @test async "Test Provided State through time range based provider"() {
+        let x = await GetController(TodosController).loadBasedOnTimeRange(state => state.timeBasedList, { from: new Date().getTime(), to: new Date().getTime() - 100000 })
+        console.log(x);
+    }
 }

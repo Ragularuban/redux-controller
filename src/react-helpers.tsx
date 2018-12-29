@@ -90,19 +90,44 @@ export function ReduxConnect<RootState, ComponentProps>(pathFunction: (state: Ro
 export class Connect extends React.PureComponent<ConnectProps, ConnectState>{
 
     state = {};
+    private reduxControllerSubscriptions = [];
 
     constructor(props) {
         super(props);
     }
 
-    @AutoUnsubscribe(
-        (context: Connect) =>
-            ReduxControllerRegistry.rootStoreAsSubject.pipe(map(context.props.mapFunction)).pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n))).subscribe(d => {
-                context.setState(d);
-            })
-    )
     componentWillMount() {
+        // Todo: this could be re-written in such a way where there exist only a single observable
+        if (this.props.connector) {
+            if (typeof this.props.connector === "function") {
+                this.reduxControllerSubscriptions.push(ReduxControllerRegistry.rootStoreAsSubject.pipe(map(this.props.connector)).pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n))).subscribe(d => {
+                    this.setState(d);
+                }));
+                // Todo: Instead of shallow equals, use deep equals to compare new arrays created by filter functions
+            } else {
+                if (this.props.connector.global) {
+                    this.reduxControllerSubscriptions.push(ReduxControllerRegistry.rootStoreAsSubject.pipe(map(this.props.connector.global)).pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n))).subscribe(d => {
+                        this.setState(d);
+                    }));
+                }
+                if (this.props.connector.subscriptions) {
+                    for (let subscription of this.props.connector.subscriptions) {
+                        this.reduxControllerSubscriptions.push(subscription.subscribe(state => {
+                            this.setState(state);
+                        }));
+                    }
+                }
+            }
+        }
 
+    }
+
+    componentWillUnmount() {
+        for (let subscription of this.reduxControllerSubscriptions) {
+            if (subscription) {
+                subscription.unsubscribe();
+            }
+        }
     }
 
 
@@ -115,10 +140,19 @@ export class Connect extends React.PureComponent<ConnectProps, ConnectState>{
 }
 
 export interface ConnectProps {
-    mapFunction: (rootState) => any,
+    connector: iConnector,
     children: JSX.Element
 }
 
 export interface ConnectState {
 
 }
+
+export type iConnector = iConnectorMultipleSubscription | iConnectorMapFunction;
+
+export interface iConnectorMultipleSubscription {
+    global?: (rootState) => any,
+    subscriptions?: Rx.Observable<any>[]
+}
+
+export type iConnectorMapFunction = (rootState: any) => any
