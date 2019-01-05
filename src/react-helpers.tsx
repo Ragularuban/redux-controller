@@ -156,3 +156,5 @@ export interface iConnectorMultipleSubscription {
 }
 
 export type iConnectorMapFunction = (rootState: any) => any
+
+export type iConnectorMap = { [components: string]: iConnector };

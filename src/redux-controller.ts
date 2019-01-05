@@ -107,7 +107,7 @@ export class ReduxControllerBase<state, rootState> {
         this.reducers.push(this.reducerForProvider);
     }
 
-    async loadBasedOnTimeRange<T>(pathFunction: (state: state) => T, { from, to }: { from: number, to: number }, forceRefresh?: boolean) {
+    async loadBasedOnTimeRange<T>(pathFunction: (state: state) => T, { from, to }: { from: number, to: number }, forceRefresh?: boolean): Promise<T> {
         let pathArray = findPath(pathFunction);
         let rootPathArray = findPath(this.rootPathFunction);
         let path = pathArray.join('.')
@@ -130,7 +130,7 @@ export class ReduxControllerBase<state, rootState> {
         } = getDescendantProp(this.state, path);
 
         if (mappedItem && (isAlreadyFetched(from, to, mappedItem.loadedRanges))) {
-            return mappedItem;
+            return mappedItem as any;
         }
 
         if (this.providerMap[path]) {
