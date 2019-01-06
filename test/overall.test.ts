@@ -29,4 +29,9 @@ class GeneralTest {
         let x = await GetController(TodosController).loadBasedOnTimeRange(state => state.timeBasedList, { from: new Date().getTime(), to: new Date().getTime() - 100000 })
         console.log(x);
     }
+
+
+    @test async "AuthGuard Works"() {
+     /
+    }
 }

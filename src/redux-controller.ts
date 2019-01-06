@@ -2,7 +2,7 @@
 import produce, { applyPatches } from "immer";
 import { Store, combineReducers, createStore, applyMiddleware, Reducer } from "redux";
 import * as Rx from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map, throttle } from 'rxjs/operators';
 import { } from "redux";
 import * as _ from 'lodash';
 import { shallowEqualObjects, findPath, getDescendantProp } from "./utilts";
@@ -10,6 +10,7 @@ import { ObjectType, isAlreadyFetched } from "./helpers";
 import { ReduxControllerRegistry } from "./redux-controller.registry";
 const changeCase = require('change-case');
 import immutable from 'object-path-immutable';
+import { interval } from "rxjs";
 
 /**
  * @description All Redux Controller must extend this class.
@@ -320,7 +321,7 @@ export function ReduxController(pathFunction: (state) => any) {
 
 
 
-export function ReduxWatch<rootState>(stateMapFunction: (state: rootState) => any) {
+export function ReduxWatch<rootState>(stateMapFunction: (state: rootState) => any, throttleInMs?: number) {
     // return the action creator function
     return (target, key: string, descriptor: TypedPropertyDescriptor<any>) => {
 
@@ -331,7 +332,11 @@ export function ReduxWatch<rootState>(stateMapFunction: (state: rootState) => an
         let actionName: string = target.actionNames[key];
         target.watchers.push((rootStoreAsSubject, rootStore) => {
             // Todo: Probably add the subscriber to a registry
-            rootStoreAsSubject.pipe(map(stateMapFunction)).pipe(distinctUntilChanged((o, n) => shallowEqualObjects(o, n))).subscribe(data => {
+
+            rootStoreAsSubject.pipe(map(stateMapFunction)).pipe(
+                distinctUntilChanged((o, n) => shallowEqualObjects(o, n)),
+                ...throttleInMs ? [throttle(val => interval(throttleInMs))] : []
+            ).subscribe(data => {
                 try {
                     // const action = {
                     //     type: actionName,
@@ -348,6 +353,21 @@ export function ReduxWatch<rootState>(stateMapFunction: (state: rootState) => an
         return descriptor;
     }
 }
+
+export function ReduxGuard<rootState>(guardFunction: (state: rootState, args?: any[]) => boolean) {
+    // return the action creator function
+    return (target, key: string, descriptor: TypedPropertyDescriptor<any>) => {
+        const originalMethod = descriptor.value;
+        (descriptor as any).value = function (...args) {
+            if (guardFunction(target.get().rootStore.getState(), args)) {
+                return originalMethod.apply(target.get(), args);
+            }
+            return null;
+        }
+        return descriptor;
+    }
+}
+
 
 
 
