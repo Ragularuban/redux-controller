@@ -37,7 +37,6 @@ export declare type ObjectType<T> = {
  */
 export function isAlreadyFetched(from: number, to: number, loadedRanges: { from: number, to: number }[]) {
     let needToLoad = true;
-    console.log('moment', moment);
     const rangeToLoad = moment(from).twix(to);
 
     // Bubble Time Period to check whether request engulf the loaded periods
