@@ -17,6 +17,8 @@ import { interval } from "rxjs";
  */
 export class ReduxControllerBase<state, rootState> {
     private reducers: Reducer[] = [];
+    private stateDraft;
+
     rootPathFunction: (state) => any;
 
     omittedPaths: string[][] = [];
@@ -43,6 +45,8 @@ export class ReduxControllerBase<state, rootState> {
             }
         )
     } = {};
+
+    commit: (commitFunction: (state: state) => void) => void;
 
 
     reducerForProvider = (state, action) => {
@@ -274,6 +278,9 @@ export class ReduxControllerBase<state, rootState> {
     }
 
     get state() {
+        if (this.stateDraft) {
+            return this.stateDraft as state;
+        }
         return this.rootPathFunction(this.rootStore.getState()) as state;
     }
 
@@ -423,12 +430,16 @@ export function ReduxAction<payload, state>(actionName?: string) {
                 if (shouldReadFromDraft) {
                     return produce(state, draft => {
                         argsToBeInjected[draftPosition] = draft;
-                        let that = target.get();
-                        let result = originalMethod.apply(that, argsToBeInjected);
+                        const context = target.get();
+                        context.stateDraft = draft;
+                        let result = originalMethod.apply(context, argsToBeInjected);
+                        context.stateDraft = null;
                     });
                 }
-                let that = target.get();
-                const returnValue = originalMethod.apply(that, argsToBeInjected);
+                const context = target.get();
+                context.stateDraft = argsToBeInjected[draftPosition];
+                const returnValue = originalMethod.apply(context, argsToBeInjected);
+                context.stateDraft = null;
                 if (Promise.resolve(returnValue) == returnValue) {
                     return state;
                 }
@@ -528,7 +539,10 @@ export function ReduxAsyncAction<payload, state>(actionName?: string, triggerGlo
                     }
                 }
                 setTimeout(() => {
-                    let asyncFunc = originalMethod.apply(target.get(), argsToBeInjected);
+                    const context = target.get();
+                    const modifiedContext = Object.assign( Object.create( Object.getPrototypeOf(context)), context);
+                    modifiedContext.commit = argsToBeInjected[draftPosition];
+                    let asyncFunc = originalMethod.apply(modifiedContext, argsToBeInjected);
                     asyncFunc.then((d) => {
                         action.resolve && action.resolve(d);
                     }).catch(e => {

@@ -37,6 +37,7 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
     providers = {
         state: {
             todoList: Provider(async () => {
+                console.log("Load Todos ML");
                 await new Promise((res, rej) => {
                     setTimeout(() => {
                         res();
@@ -68,30 +69,57 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
         //         state.todoList.data = dummyTodos;
         //     });
         // }, 2000);
-        console.log("Load Todos");
-        await this.load(state => state.todoList);
+        console.log("Load Todos XYS");
+        await this.load(state => state.todoList, true);
     }
 
     @ReduxAction('ADD_TODO')
-    addTodo(text: string, state?: TodoState) {
-        state.todoList.data.push({
+    async addTodo(text: string) {
+        this.state.todoList.data.push({
             id: text,
             text: text,
             isCompleted: false
         });
+        // setTimeout(async () => {
+        //     await this.load(state => state.todoList, true)
+        // }, 500);
     }
 
-    @ReduxAsyncAction()
+    @ReduxAsyncAction('TEST_1')
     async loadTodosInTimeRange({ from, to }: { from: number, to: number }, state?: TodoState, commit?: CommitFunction<TodoState>) {
         console.log("Helloo");
-        commit(state => {
+        this.commit(state => {
             state.timeBasedList.data.push({
                 id: "XX",
                 text: "Todo 1",
                 isCompleted: false
             })
             state.timeBasedList.loadedRanges.push({ from, to });
-        })
+        });
+        setTimeout(async () => {
+            await this.load(state => state.todoList, true);
+        }, 500);
+    }
+
+    @ReduxAsyncAction('TEST_2')
+    async test2Async({ from, to }: { from: number, to: number }, state?: TodoState, commit?: CommitFunction<TodoState>) {
+        console.log("Helloo");
+        await new Promise(resolve => {
+            setTimeout(() => {
+                resolve();
+            }, 3000);
+        });
+        this.commit(state => {
+            state.timeBasedList.data.push({
+                id: "XX",
+                text: "Test 2",
+                isCompleted: false
+            })
+            state.timeBasedList.loadedRanges.push({ from, to });
+        });
+        setTimeout(async () => {
+            await this.load(state => state.todoList, true);
+        }, 500);
     }
 
     @ReduxAction('REMOVE_TODO')
@@ -103,6 +131,16 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
     @ReduxEffect('LOGIN_COMMIT')
     watchForLogin(text: string, state?: TodoState) {
         this.loadTodos();
+    }
+
+    @ReduxEffect('TEST_1_COMMIT')
+    test1(text: string, state?: TodoState) {
+        console.log("Commit 1");
+    }
+
+    @ReduxEffect('TEST_2_COMMIT')
+    test2(text: string, state?: TodoState) {
+        console.log("Commit 2");
     }
 }
 
