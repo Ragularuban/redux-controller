@@ -44,7 +44,13 @@ export const ReduxControllerRegistry = {
         for (let path of ReduxControllerRegistry.blacklistedPaths) {
             _.set(data, path.join('.'), getDescendantProp(defaultState, path.join('.')));
         }
-        ReduxControllerRegistry.rootStore.dispatch({ type: "REDUX_STORAGE_LOAD", payload: data });
+        const statePaths = ReduxControllerRegistry.controllers.reduce((prev, current) => {
+            const rootPathArray = findPath(current.instance.rootPathFunction);
+            prev.push(rootPathArray[0]);
+            return prev;
+        }, []);
+
+        ReduxControllerRegistry.rootStore.dispatch({ type: "REDUX_STORAGE_LOAD", payload: _.pick(data, ...statePaths) });
     },
     init: <RootState>(controllers: ObjectType<ReduxControllerBase<any, any>>[], options: ReduxControllerOptions_web | ReduxControllerOptions_reactNative | ReduxControllerOptions_node | ReduxControllerOptions_node = {
         environment: 'ANGULAR',
