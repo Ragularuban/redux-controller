@@ -299,4 +299,20 @@ Todo: Fill in contributors
 
 
 
+# Debugging in NodeJs
+Run Process
+chrome://inspect/#devices
+Install Remove Dev
+npm install --save-dev remotedev-server
+or
+npm install -g remotedev-server
+Run to start dev server
+remotedev --hostname=localhost --port=1234
 
+Pass in options.devToolsOptions to init function
+```
+            devToolsOptions: {
+                host: '127.0.0.1',
+                port: 1234
+            }
+```

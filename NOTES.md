@@ -56,3 +56,13 @@ May be this approch - Trigger an action that changes the state, without the func
 and at the end of this another action is triggered, which you can listen to
 Or May be
 Have a subscription Method for Actions to listen to all the actions of that type
+
+
+- Need to remove JSX
+- Normalised Redux State
+- preferred interface UserController.get().load();
+-- Tried to do it, but, feel like it's impossible as it hard to get the typings, method is already there, but hard to get typings
+- Automatic action names should consider Class name as well to prevent similar actions getting triggered
+- Use async draft  - https://github.com/mweststrate/immer
+--- async draft is there, but if we are to implement need to think draft registry or commit registry to keep track of changes, --- tried to implement it without minimal changes, but seems impossible without registry
+- what if we convert all methods to static that you don't need to worry about singletons

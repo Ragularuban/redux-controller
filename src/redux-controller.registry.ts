@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 import { ReduxControllerBase } from "./redux-controller";
 import { GetController, ObjectType, GetSafely } from "./helpers";
 const autoBind = require('auto-bind');
+// import { composeWithDevTools } from 'remote-redux-devtools';
 
 declare let window;
 
@@ -20,7 +21,7 @@ export const ReduxControllerRegistry = {
     rootStore: null,
     storageEngine: null,
     blacklistedPaths: [],
-    options: null as ReduxControllerOptions_web | ReduxControllerOptions_reactNative_node,
+    options: null as ReduxControllerOptions_web | ReduxControllerOptions_reactNative | ReduxControllerOptions_node,
     load: async (options?: { source: string }) => {
         // Overview
         // --------
@@ -45,7 +46,7 @@ export const ReduxControllerRegistry = {
         }
         ReduxControllerRegistry.rootStore.dispatch({ type: "REDUX_STORAGE_LOAD", payload: data });
     },
-    init: <RootState>(controllers: ObjectType<ReduxControllerBase<any, any>>[], options: ReduxControllerOptions_web | ReduxControllerOptions_reactNative_node = {
+    init: <RootState>(controllers: ObjectType<ReduxControllerBase<any, any>>[], options: ReduxControllerOptions_web | ReduxControllerOptions_reactNative | ReduxControllerOptions_node | ReduxControllerOptions_node = {
         environment: 'ANGULAR',
         middleware: [],
         persistance: {
@@ -125,13 +126,23 @@ export const ReduxControllerRegistry = {
 
 
         // Create Composers and add Dev Tools
+
         // Todo: Check enableDevTools and enable the dev tools
         const composeEnhancers =
             typeof window === 'object' &&
                 window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?
                 window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
                     // Specify extension’s options like name, actionsBlacklist, actionsCreators, serialize...
-                }) : compose;
+                })
+                // : (options.environment == "NODE") ? composeWithDevTools({
+                //     realtime: true,
+                //     name: 'Redux Controllers Dev',
+                //     hostname: options.devToolsOptions ? options.devToolsOptions.host : '127.0.0.1',
+                //     port: options.devToolsOptions ? options.devToolsOptions.port : 8000, // the port your remotedev server is running at
+                // }) 
+                : compose;
+
+
 
         const enhancer = composeEnhancers(
             applyMiddleware(...middlewareToBeApplied),
@@ -196,7 +207,7 @@ export const ReduxControllerRegistry = {
     }
 }
 
-export type ReduxControllerOptions = ReduxControllerOptions_web | ReduxControllerOptions_reactNative_node;
+export type ReduxControllerOptions = ReduxControllerOptions_web | ReduxControllerOptions_reactNative;
 
 export interface ReduxControllerOptions_web {
     environment: "ANGULAR" | "REACT",
@@ -211,12 +222,24 @@ export interface ReduxControllerOptions_web {
     enableDevTools?: boolean
 }
 
-export interface ReduxControllerOptions_reactNative_node {
-    environment: "REACT_NATIVE" | "NODE",
+export interface ReduxControllerOptions_reactNative {
+    environment: "REACT_NATIVE",
     middleware?: any[],
     persistance?: ReduxControllerOptions_reactNative_node_persistence_on | ReduxControllerOptions_reactNative_node_persistence_off,
     reducerToJoin?: Reducer<any>,
     enableDevTools?: boolean
+}
+
+export interface ReduxControllerOptions_node {
+    environment: "NODE",
+    middleware?: any[],
+    persistance?: ReduxControllerOptions_reactNative_node_persistence_on | ReduxControllerOptions_reactNative_node_persistence_off,
+    reducerToJoin?: Reducer<any>,
+    enableDevTools?: boolean,
+    devToolsOptions?: {
+        host: string,
+        port: number
+    }
 }
 
 

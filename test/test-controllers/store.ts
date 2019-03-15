@@ -20,5 +20,9 @@ export function initReduxControllers() {
                 throttle: 100,
                 asyncStorageRef: LocalStorage
             },
+            devToolsOptions: {
+                host: '127.0.0.1',
+                port: 1234
+            }
         });
 }

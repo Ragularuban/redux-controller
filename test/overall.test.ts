@@ -11,6 +11,7 @@ import { TodosController } from "./test-controllers/todos/todos.controller";
 @suite(timeout(90000))
 class GeneralTest {
     static async before() {
+        console.log("fsffs");
         initReduxControllers();
     }
 

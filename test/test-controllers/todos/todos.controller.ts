@@ -87,7 +87,8 @@ export class TodosController extends ReduxControllerBase<TodoState, RootState> {
 
     @ReduxAsyncAction('TEST_1')
     async loadTodosInTimeRange({ from, to }: { from: number, to: number }, state?: TodoState, commit?: CommitFunction<TodoState>) {
-        console.log("Helloo");
+        // node --inspect-brk node_modules/mocha/bin/_mocha -u tdd --timeout 999999 --colors /Users/ruban/Projects/redux-controllers/test 
+        console.log("Helcdsdsloo");
         this.commit(state => {
             state.timeBasedList.data.push({
                 id: "XX",

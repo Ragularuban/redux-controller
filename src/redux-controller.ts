@@ -540,14 +540,35 @@ export function ReduxAsyncAction<payload, state>(actionName?: string, triggerGlo
                 }
                 setTimeout(() => {
                     const context = target.get();
-                    const modifiedContext = Object.assign( Object.create( Object.getPrototypeOf(context)), context);
+                    const modifiedContext = Object.assign(Object.create(Object.getPrototypeOf(context)), context);
                     modifiedContext.commit = argsToBeInjected[draftPosition];
+
                     let asyncFunc = originalMethod.apply(modifiedContext, argsToBeInjected);
+
                     asyncFunc.then((d) => {
                         action.resolve && action.resolve(d);
                     }).catch(e => {
                         action.reject && action.reject(e);
                     });
+                    // let returnData;
+
+                    // produce(context.state, async (draft) => {
+                    //     modifiedContext.stateDraft = draft;
+                    //     let asyncFunc = originalMethod.apply(modifiedContext, argsToBeInjected);
+                    //     const data = await asyncFunc;
+                    //     returnData = data;
+                    //     const action = {
+                    //         type: `${actionName}_COMMIT`,
+                    //         payload: {}
+                    //     };
+                    //     target.rootStore.dispatch(action);
+                    //     return data;
+                    // }).then(d => {
+                    //     action.resolve && action.resolve(returnData);
+                    // }).catch(e => {
+                    //     action.reject && action.reject(e);
+                    // });
+
                 });
 
                 return state;
