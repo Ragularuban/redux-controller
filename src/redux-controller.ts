@@ -540,7 +540,7 @@ export function ReduxAsyncAction<payload, state>(actionName?: string, triggerGlo
                 }
                 setTimeout(() => {
                     const context = target.get();
-                    const modifiedContext = Object.assign(Object.create(Object.getPrototypeOf(context)), context);
+                    const modifiedContext = Object.assign(Object.create(Object.getPrototypeOf(context)), JSON.parse(JSON.stringify(context)));
                     modifiedContext.commit = argsToBeInjected[draftPosition];
 
                     let asyncFunc = originalMethod.apply(modifiedContext, argsToBeInjected);
