@@ -540,10 +540,22 @@ export function ReduxAsyncAction<payload, state>(actionName?: string, triggerGlo
                 }
                 setTimeout(() => {
                     const context = target.get();
-                    const modifiedContext = Object.assign(Object.create(Object.getPrototypeOf(context)), JSON.parse(JSON.stringify(context)));
-                    modifiedContext.commit = argsToBeInjected[draftPosition];
 
-                    let asyncFunc = originalMethod.apply(modifiedContext, argsToBeInjected);
+                    const proxyHandler = {
+                        get: function (obj, prop) {
+                            if (prop == "commit") {
+                                return argsToBeInjected[draftPosition];
+                            }
+                            return obj[prop];
+                        }
+                    };
+
+                    var proxiedContext = new Proxy(context, proxyHandler);
+
+                    // const modifiedContext = Object.assign(Object.create(Object.getPrototypeOf(context)), context);
+                    // modifiedContext.commit = argsToBeInjected[draftPosition];
+
+                    let asyncFunc = originalMethod.apply(proxiedContext, argsToBeInjected);
 
                     asyncFunc.then((d) => {
                         action.resolve && action.resolve(d);
