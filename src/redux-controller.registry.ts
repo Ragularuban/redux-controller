@@ -80,7 +80,7 @@ export const ReduxControllerRegistry = {
                     pointer = pointer[path[i]];
                 } else {
                     if (pointer[path[i]]) {
-                        throw new Error(`Redux Controller Paths Overlaps. Check path: ${path.join('.')}`)
+                        throw new Error(`Redux Controller Paths Overlaps. Check path: ${path.join('.')} . This could also be because you have registered the controllers twice`)
                     }
                     pointer[path[i]] = GetController(controller).getReducerFunction();
                 }
