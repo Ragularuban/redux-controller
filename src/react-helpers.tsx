@@ -141,7 +141,8 @@ export class Connect extends React.PureComponent<ConnectProps, ConnectState>{
 
 export interface ConnectProps {
     connector: iConnector,
-    children: JSX.Element
+    // children: JSX.Element
+    children: any
 }
 
 export interface ConnectState {
