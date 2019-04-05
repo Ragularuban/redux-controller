@@ -316,3 +316,7 @@ Pass in options.devToolsOptions to init function
                 port: 1234
             }
 ```
+
+
+# Todo
+Add Helper Notes with https://stackoverflow.com/questions/43177855/how-to-create-a-deep-proxy for state and commit function
