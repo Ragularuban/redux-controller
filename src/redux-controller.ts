@@ -432,18 +432,29 @@ export function ReduxAction<payload, state>(actionName?: string) {
                         argsToBeInjected[draftPosition] = draft;
                         const context = target.get();
                         context.stateDraft = draft;
-                        let result = originalMethod.apply(context, argsToBeInjected);
+                        try {
+                            let result = originalMethod.apply(context, argsToBeInjected);
+                        } catch (e) {
+                            context.stateDraft = null;
+                            throw e;
+                        }
                         context.stateDraft = null;
                     });
                 }
                 const context = target.get();
                 context.stateDraft = argsToBeInjected[draftPosition];
-                const returnValue = originalMethod.apply(context, argsToBeInjected);
-                context.stateDraft = null;
-                if (Promise.resolve(returnValue) == returnValue) {
-                    return state;
+                try {
+                    const returnValue = originalMethod.apply(context, argsToBeInjected);
+                    context.stateDraft = null;
+                    if (Promise.resolve(returnValue) == returnValue) {
+                        return state;
+                    }
+                    return returnValue;
+                } catch (e) {
+                    context.stateDraft = null;
+                    throw e;
                 }
-                return returnValue;
+
 
             }
             return state || target.defaultState;
