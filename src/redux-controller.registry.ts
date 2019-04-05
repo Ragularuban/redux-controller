@@ -31,8 +31,14 @@ export const ReduxControllerRegistry = {
         //       Loading an non-existent path would throw and error. Therefor we need to manage it
         //  -> Load data to Redux Storage
         // --------
+        let data;
+        try {
+            data = await ReduxControllerRegistry.storageEngine.load();
+        } catch (e) {
+            console.log('error while loading data from storage, Loading Empty Objects', e);
+            data = {};
+        }
 
-        let data = await ReduxControllerRegistry.storageEngine.load();
 
         // If a source is provided, then load the data from it the current store
         if (options && options.source) {
@@ -119,7 +125,7 @@ export const ReduxControllerRegistry = {
             ReduxControllerRegistry.blacklistedPaths = blacklistedPaths;
             /// Create Storage Engine
             let storageEngine = Providers.getCreateEngine(options.environment, GetSafely(() => (options.persistance as any).asyncStorageRef))(options.persistance.storageKey || 'REDUX_CONTROLLERS');
-            storageEngine = debounce(storageEngine, 2000);
+            storageEngine = debounce(storageEngine, options.persistance.throttle || 2000);
             storageEngine = filter(storageEngine, [], blacklistedPaths);
             ReduxControllerRegistry.storageEngine = storageEngine;
 
