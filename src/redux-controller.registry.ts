@@ -176,7 +176,7 @@ export const ReduxControllerRegistry = {
         ReduxControllerRegistry.controllers.forEach(ctrl => {
             if (ctrl.instance.watchers) {
                 ctrl.instance.watchers.forEach(watcher => {
-                    watcher(rootStoreAsSubject, AppStore);
+                    watcher(rootStoreAsSubject, ctrl.instance);
                 });
             }
         });

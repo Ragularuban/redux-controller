@@ -2,7 +2,7 @@
 import produce, { applyPatches } from "immer";
 import { Store, combineReducers, createStore, applyMiddleware, Reducer } from "redux";
 import * as Rx from 'rxjs';
-import { distinctUntilChanged, map, throttle } from 'rxjs/operators';
+import { distinctUntilChanged, map, throttle, filter } from 'rxjs/operators';
 import { } from "redux";
 import * as _ from 'lodash';
 import { shallowEqualObjects, findPath, getDescendantProp } from "./utilts";
@@ -337,7 +337,7 @@ export function ReduxWatch<rootState>(stateMapFunction: (state: rootState) => an
         }
 
         let actionName: string = target.actionNames[key];
-        target.watchers.push((rootStoreAsSubject, rootStore) => {
+        target.watchers.push((rootStoreAsSubject, instance) => {
             // Todo: Probably add the subscriber to a registry
 
             rootStoreAsSubject.pipe(map(stateMapFunction)).pipe(
@@ -345,14 +345,9 @@ export function ReduxWatch<rootState>(stateMapFunction: (state: rootState) => an
                 ...throttleInMs ? [throttle(val => interval(throttleInMs))] : []
             ).subscribe(data => {
                 try {
-                    // const action = {
-                    //     type: actionName,
-                    //     payload: data
-                    // };
-                    // rootStore.dispatch(action);
-                    descriptor.value.bind(target)(data);
+                    descriptor.value.bind(instance)(data);
                 } catch (e) {
-                    console.log("Error while dispatching action", e);
+                    console.log("Error while executing watch action", e);
                 }
             });
         });
