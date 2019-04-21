@@ -167,10 +167,6 @@ export const ReduxControllerRegistry = {
         ReduxControllerRegistry.rootStoreAsSubject = rootStoreAsSubject;
 
 
-        AppStore.subscribe(() => {
-            rootStoreAsSubject.next(AppStore.getState());
-        });
-
         // Activate Store
         ReduxControllerRegistry.controllers.forEach(ctrl => {
             ctrl.instance.setStore(AppStore);
@@ -204,6 +200,11 @@ export const ReduxControllerRegistry = {
         // Bind this context
         ReduxControllerRegistry.controllers.forEach(ctrl => {
             autoBind(ctrl.instance);
+        });
+
+        // Listen to events
+        AppStore.subscribe(() => {
+            rootStoreAsSubject.next(AppStore.getState());
         });
 
         ReduxControllerRegistry.ready = true;

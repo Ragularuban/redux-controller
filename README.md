@@ -320,3 +320,23 @@ Pass in options.devToolsOptions to init function
 
 # Todo
 Add Helper Notes with https://stackoverflow.com/questions/43177855/how-to-create-a-deep-proxy for state and commit function
+
+- Add `.set(state=>state.foo,{value});` method to set a path 
+- Add Provide Crud | Provide Resource
+```
+ProvideCrud({
+load:()=>{},
+edit:()=>{}
+})
+```
+- Add Provide Resources
+```
+ProvideResources({
+key:'id'
+load:()=>{},
+edit:()=>{},
+delete:()=>{}
+}),
+```
+- make payload optional for redux action and async action
+- expose this.rootState
